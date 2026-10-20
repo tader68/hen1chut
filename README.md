@@ -1,38 +1,39 @@
 # Hẹn 1 chút
 
-Game xả stress hoạt hình tiếng Việt. Vite + TypeScript, không backend hay tài khoản.
+Game hoạt hình tiếng Việt tại https://tader68.github.io/hen1chut/. Vite + TypeScript, SVG nhân vật, Canvas particles và Web Audio. Supabase Free cung cấp tài khoản, đồng bộ riêng tư và bảng xếp hạng.
 
-## Chạy local
+## Chạy và kiểm tra
 
 ```sh
 npm ci
 npm run dev
-```
-
-Mở URL Vite in trong terminal. Chọn 1 trong 6 đồ chơi, chạm nhân vật hoặc dùng Enter/Space khi nhân vật được focus. Phím 1–6 đổi đồ chơi. Có 4 loại nhân vật, 3 trang phục, 3 dáng, 6 màu và 3 bối cảnh.
-
-Nhân vật và lựa chọn âm thanh được lưu bằng localStorage. Âm thanh mặc định tắt. Nếu trình duyệt không cho lưu, game vẫn hoạt động. Nhân vật có phản ứng tạm thời và trở lại bình thường sau mỗi lượt. Bộ đếm là số lần tương tác, không phải điểm damage.
-
-## Kiểm tra và build
-
-```sh
 npm test
 npm run build
 npm run preview
 ```
 
-Output nằm trong `dist/`. Asset dùng đường dẫn tương đối để chạy được ở cả root domain và subdirectory. Không có analytics. Web Audio chỉ khởi động sau khi người chơi bật âm thanh. Hỗ trợ reduced motion và keyboard.
+Chưa cấu hình backend vẫn chơi được trên máy. Copy `.env.example` sang `.env.local` và điền Project URL, publishable key để kết nối. Không đưa `service_role`, `sb_secret_...` hoặc Google Client secret vào frontend.
 
-## Public
+## Trải nghiệm hiện có
 
-Repo dùng `.github/workflows/deploy.yml`: push vào `main` sẽ test, build và deploy GitHub Pages. Trong Settings → Pages, Source là GitHub Actions. Workflow cần quyền `pages: write` và `id-token: write`.
+- 4 nhân vật, Cục bực có tạo hình riêng, 12 trang phục, 8 lựa chọn mũ và 5 lựa chọn kính, 3 dáng, 6 màu.
+- 12 đồ chơi với art, chuyển động, particles và âm thanh riêng. Phím 1–6 chọn sáu món đầu, Enter/Space dùng món đang chọn khi focus nhân vật.
+- 3 bối cảnh: phòng chill, vườn mưa, vũ trụ.
+- Phiên chưa kết thúc giữ số lượt, biểu cảm và tối đa 18 dấu tác động gần nhất, cùng nhân vật và bối cảnh. Reload không xóa phiên. Nút kết thúc yêu cầu chọn rõ mở phiên mới.
+- Tủ đồ xem trước, bài thở 8 giây, gợi ý hằng ngày và bưu thiếp PNG. Link chia sẻ ngoại hình không chứa tên nhân vật. Bưu thiếp mặc định ẩn tên riêng.
+- Khi Google provider sẵn sàng, onboarding yêu cầu Google rồi tạo nickname và tên nhân vật. Đăng nhập lần đầu có thể nhập phiên trên máy. Khi provider chưa bật hoặc không tải được cấu hình, chơi local vẫn hoạt động.
+- Bảng điểm đọc từ server. Thi đấu cần tài khoản, vòng 30 giây, giới hạn server 8 lượt/giây và sequence chống gửi lại. Đây không phải cơ chế ngăn mọi bot.
 
-URL của repo hiện tại: https://tader68.github.io/hen1chut/
+## Database và public
 
-Cloudflare Pages cũng chạy được: build command `npm run build`, output directory `dist`, Node 24. Khi chuyển domain, cập nhật `og:image` trong `index.html` cho đúng URL.
+Project Supabase `hen1chut` đã tạo trong organization cá nhân hiện có, vùng Singapore, gói Free. Hai migration trong `supabase/migrations/` đã áp dụng online. Sáu bảng đều bật RLS, dữ liệu riêng chỉ tài khoản sở hữu đọc được. Bảng công khai chỉ trả nickname, ngoại hình và điểm qua RPC giới hạn kết quả.
 
-## Phạm vi kiểm chứng
+Xem `docs/ket-noi-supabase-free.md` để nối Google OAuth và cấu hình build. Workflow `.github/workflows/deploy.yml` test, build và deploy GitHub Pages khi push `main`. Hai Actions Variables là `VITE_SUPABASE_URL` và `VITE_SUPABASE_PUBLISHABLE_KEY`, đều là cấu hình public.
 
-Unit tests kiểm tra reaction, dữ liệu nhân vật lỗi hoặc không an toàn, toàn bộ 216 tổ hợp nhân vật ở 4 trạng thái và các định nghĩa công cụ/bối cảnh. Đây không phải bằng chứng đo FPS, Lighthouse hoặc thử trên thiết bị iOS thật.
+Quảng cáo và bán cosmetics là hướng kiếm tiền đã chọn, hiện chưa có quảng cáo/checkout hoạt động. Không dùng điểm hoặc unlock giả để mô phỏng thanh toán thành công. Bảng `entitlements` chỉ cho tài khoản đọc quyền của mình, frontend không được tự cấp.
 
-Browser smoke test ngày 21/10/2026: đã chơi 72 tổ hợp 4 loại × 6 công cụ × 3 bối cảnh, đếm đúng 72 lượt và không console error. Đã kiểm tra desktop, mobile 375px không tràn ngang, reload giữ nhân vật, Enter/Space, bật/tắt âm thanh và dialog bài thở.
+## Bằng chứng kiểm tra
+
+Ngày 21/10/2026, 38 tests qua trên 10 files, gồm thực thi migration bằng PostgreSQL WASM, RLS giữa hai tài khoản, từ chối ghi điểm/entitlement trực tiếp, revision conflict và vòng thi đấu server. Browser bản build: 144 tổ hợp 4 nhân vật × 12 đồ chơi × 3 bối cảnh ghi đúng 144 lượt, không console error. Reload giữ 144 lượt, hoodie, mũ len, kính tròn và dấu pháo giấy. Chọn chơi tiếp giữ phiên, mở phiên mới đưa về 0 và xóa dấu, vẫn giữ trang phục. PNG bưu thiếp đã tải được. Đã xem lại bằng khung trình duyệt 320px và 375px, sửa thanh đồ chơi xếp dọc che sân chơi thành hàng ngang có vuốt.
+
+Google OAuth thật, đồng bộ hai thiết bị, thanh toán/quảng cáo live, Lighthouse/FPS và thiết bị iOS/Android thật vẫn cần kiểm chứng riêng. Tests local không thay thế các bằng chứng này. Bản code mới chỉ là bản public sau khi workflow deploy của commit tương ứng thành công.

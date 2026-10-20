@@ -29,6 +29,12 @@ export class Particles {
       water: ["#b1e2f5", "#77bfdc", "#e6faff"],
       boot: ["#ecc27f", "#fff2cb", "#fff"],
       lightning: ["#ffe599", "#f7ca5d", "#fff5d3"],
+      boxing: ["#f1b0b8", "#fff1ba", "#fff"],
+      spring: ["#a8cfb8", "#d9e9cd", "#fff"],
+      slipper: ["#87b7a7", "#d7e9cc", "#fff"],
+      chicken: ["#f1d894", "#fff1ca", "#e8a18d"],
+      banana: ["#e9ce67", "#fff2ac", "#fff"],
+      confetti: ["#c7a1df", "#f1bcce", "#9dcdbb"],
     };
     for (let i = 0; i < (gentle ? 6 : 26) && this.list.length < 160; i++) {
       const angle = Math.random() * Math.PI * 2,

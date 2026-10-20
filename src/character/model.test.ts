@@ -30,7 +30,7 @@ describe("saved characters", () => {
   });
 });
 describe("rendering coverage", () => {
-  it("renders all 216 character combinations in every mood without invalid numbers", () => {
+  it("renders every base character combination in every mood without invalid numbers", () => {
     for (const kind of kinds)
       for (const outfit of outfits)
         for (const body of bodies)
@@ -50,7 +50,7 @@ describe("rendering coverage", () => {
             }
   });
   it("has distinct art and valid definitions for every tool and scene", () => {
-    expect(new Set(tools.map((t) => toolArt(t.id))).size).toBe(6);
+    expect(new Set(tools.map((t) => toolArt(t.id))).size).toBe(tools.length);
     expect(new Set(scenes.map((s) => sceneArt(s.id))).size).toBe(3);
   });
 });
