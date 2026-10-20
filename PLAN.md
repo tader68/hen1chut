@@ -1,5 +1,14 @@
 # Implementation plan: web xả stress (hen1chut)
 
+## Cập nhật ngày 21/10/2026
+
+- Đã thay sân khấu cơ bản bằng giao diện responsive, nhân vật SVG có gradient, bóng đổ và chuyển động, 6 đồ chơi có hình và hiệu ứng riêng, 3 bối cảnh có chuyển động khác nhau.
+- Đã có 4 loại nhân vật, 3 trang phục, 3 dáng, 6 màu, đặt tên tối đa 20 ký tự và lưu localStorage có validate/fallback.
+- Đã thêm bật/tắt Web Audio, phím 1–6, Enter/Space để chơi, reduced motion, bài thở 4 giây hít vào / 4 giây thở ra và chia sẻ link trang.
+- Đã thêm favicon, ảnh OG PNG, font phục vụ nội bộ cùng license và workflow deploy GitHub Pages. Không tracking, không backend.
+- Kiểm chứng: build TypeScript/Vite và 9 unit tests pass. Render test duyệt 216 tổ hợp ngoại hình × 4 trạng thái. Browser smoke test 72 tổ hợp loại nhân vật × đồ chơi × bối cảnh ghi nhận đúng 72 lượt, không console error. Mobile 375px không tràn ngang. Đổi nhân vật, reload vẫn giữ tên/trang phục/dáng.
+- Chưa đo Lighthouse/FPS, chưa thử iOS/Android thật, chưa kiểm chứng preview trên ứng dụng mạng xã hội. Nút lưu ảnh vẫn là hạng mục tùy chọn chưa triển khai. Checkpoint cần người dùng review vẫn để người dùng đánh giá sau khi chơi.
+
 ## Overview
 
 Website tĩnh, miễn phí, tiếng Việt. User tạo 1 nhân vật hoạt hình (nam, nữ, con vật, đồ vật), đặt tên, chọn trang phục và hình dáng, rồi chọn công cụ và môi trường để "tác động" lên nhân vật. Nhân vật phản ứng vui nhộn, không máu, không gore. Không backend, không đăng nhập, lưu nhân vật bằng localStorage.

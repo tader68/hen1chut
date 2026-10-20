@@ -1,8 +1,7 @@
 {
   "name": "hen1chut",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Game xả stress hoạt hình tiếng Việt, chạy hoàn toàn trên trình duyệt",
   "scripts": {
     "test": "vitest run",
     "dev": "vite",
