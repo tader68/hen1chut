@@ -11,6 +11,8 @@ async function start(): Promise<void> {
     const { Cloud } = await import("./platform/cloud");
     cloud = new Cloud(cloudConfig.url!, cloudConfig.key!);
   }
+  const status = root.querySelector("[data-startup-status]");
+  if (status && cloud) status.textContent = "Đang tải tài khoản và phiên chơi…";
   const account = await onboard(
     root,
     cloud,

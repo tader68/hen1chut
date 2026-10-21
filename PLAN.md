@@ -10,6 +10,7 @@ Yêu cầu và tiêu chí bằng chứng hiện hành nằm ở `PRODUCT.md`. Fi
 - Vòng global 30 giây, server kiểm soát thời gian/giới hạn lượt/sequence, bảng thật all-time và 7 ngày.
 - Gợi ý ngày, bài thở, bưu thiếp PNG, link ngoại hình riêng tư, trang hướng dẫn/quyền riêng tư/giới thiệu/404 và metadata.
 - Supabase Free online tại Singapore, RLS trên 6 bảng, 3 migration đã áp dụng. API leaderboard thật có vòng QA 3 lượt của chủ dự án, không seed điểm giả.
+- Startup HTML có trạng thái tải và đường phục hồi khi chờ lâu, mô tả search đúng luồng Google. Font WOFF2 giảm 69,6% tổng dung lượng 5 font, giữ nguyên glyph.
 
 ## Đang hoàn tất
 

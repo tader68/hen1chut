@@ -10,7 +10,7 @@
     <title>Hẹn 1 chút · Bực một chút. Nhẹ đi nhiều.</title>
     <meta
       name="description"
-      content="Một góc nhỏ để xả bực với nhân vật hoạt hình, đồ chơi mềm và chút hài hước. Miễn phí, không tài khoản, lưu riêng trên máy bạn."
+      content="Game xả stress hoạt hình tiếng Việt miễn phí. Đăng nhập Google để giữ nhân vật, chơi với 12 đồ chơi, thay trang phục và tham gia bảng xếp hạng toàn cầu."
     />
     <meta
       property="og:title"
@@ -30,14 +30,83 @@
     <meta property="og:url" content="https://tader68.github.io/hen1chut/" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="/fonts.css" />
+    <link rel="stylesheet" href="/fonts-woff2.css" />
+    <style>
+      .startup {
+        box-sizing: border-box;
+        min-height: 100vh;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        padding: 32px 24px;
+        background: #f7f6fa;
+        color: #493a56;
+        font-family: "Be Vietnam Pro", system-ui, sans-serif;
+        text-align: center;
+        line-height: 1.7;
+      }
+      body:has(.startup) { margin: 0; }
+      .startup-brand { display: inline-flex; align-items: center; min-height: 44px; color: #493a56; font-size: 22px; font-weight: 800; text-decoration: none; letter-spacing: -1px; }
+      .startup-brand span { color: #7960a3; }
+      .startup-content { max-width: 28rem; }
+      .startup-noscript { max-width: 28rem; }
+      .startup-mascot { display: block; width: 88px; height: 88px; margin: 0 auto 24px; transform: rotate(-5deg); }
+      .startup h1 { margin: 0 0 12px; font-size: 24px; line-height: 1.4; }
+      .startup p { margin: 0; color: #6c5f77; font-size: 14px; }
+      .startup-dots { display: flex; justify-content: center; gap: 7px; margin: 24px 0; }
+      .startup-dots span { width: 6px; height: 6px; border-radius: 50%; background: #7960a3; animation: startup-pulse 1.4s ease-in-out infinite; }
+      .startup-dots span:nth-child(2) { animation-delay: .18s; }
+      .startup-dots span:nth-child(3) { animation-delay: .36s; }
+      .startup-slow { max-width: 28rem; }
+      .startup-slow[hidden] { display: none; }
+      .startup-retry { display: inline-block; margin-top: 16px; padding: 10px 22px; border-radius: 12px; background: #70518f; color: white; font-size: 14px; font-weight: 600; text-decoration: none; }
+      .startup-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; font-size: 13px; }
+      .startup-links a { display: inline-flex; align-items: center; min-height: 44px; color: #6c5f77; text-decoration: underline; text-underline-offset: 4px; }
+      .startup a:focus-visible { outline: 3px solid #7960a3; outline-offset: 5px; }
+      @keyframes startup-pulse { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .startup-dots span { animation: none; } }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
-    <noscript
-      >Hẹn 1 chút cần JavaScript để vẽ nhân vật và chơi. Hãy bật JavaScript rồi
-      tải lại trang nhé.</noscript
-    >
+    <div id="app">
+      <main class="startup" id="startup" aria-labelledby="startup-title">
+        <a class="startup-brand" href="./" aria-label="Hẹn 1 chút, trang chủ">hẹn<span>1</span>chút<span>.</span></a>
+        <div class="startup-content">
+          <img class="startup-mascot" src="./favicon.svg" alt="" width="88" height="88" />
+          <h1 id="startup-title">Bự đang mở cửa…</h1>
+          <p role="status" data-startup-status>Đang chuẩn bị góc nhỏ của bạn.</p>
+          <div class="startup-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <div class="startup-slow" id="startup-slow" hidden>
+          <p>Chờ hơi lâu rồi. Bạn có thể tải lại trang hoặc mở hướng dẫn bên dưới. Phiên đã lưu vẫn được giữ lại.</p>
+          <a class="startup-retry" href="">Tải lại trang</a>
+        </div>
+        <noscript>
+          <style>.startup-content, .startup-slow { display: none !important; }</style>
+          <div class="startup-noscript">
+            <h1>Bật JavaScript để chơi cùng Bự.</h1>
+            <p>Hẹn 1 chút cần JavaScript để vẽ nhân vật và chơi. Hãy bật JavaScript rồi tải lại trang. Bạn vẫn có thể đọc các trang bên dưới.</p>
+          </div>
+        </noscript>
+        <nav class="startup-links" aria-label="Thông tin Hẹn 1 chút">
+          <a href="./huong-dan.html">Cách chơi</a>
+          <a href="./quyen-rieng-tu.html">Quyền riêng tư</a>
+        </nav>
+      </main>
+    </div>
+    <script>
+      (() => {
+        const startup = document.getElementById("startup");
+        setTimeout(() => {
+          if (!startup?.isConnected) return;
+          document.getElementById("startup-slow").hidden = false;
+          startup.querySelector("[data-startup-status]").textContent = "Chưa mở xong góc nhỏ.";
+        }, 8000);
+      })();
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

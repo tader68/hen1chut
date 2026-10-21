@@ -23,6 +23,21 @@ Chưa cấu hình backend vẫn chơi được trên máy. Copy `.env.example` s
 - Tủ đồ xem trước, bài thở 8 giây, gợi ý hằng ngày và bưu thiếp PNG. Link chia sẻ ngoại hình không chứa tên nhân vật và được giữ qua redirect Google. Bưu thiếp mặc định ẩn tên riêng.
 - Khi Google provider sẵn sàng, onboarding yêu cầu Google rồi tạo nickname và tên nhân vật. Đăng nhập lần đầu có thể nhập phiên trên máy. Khi provider chưa bật hoặc không tải được cấu hình, chơi local vẫn hoạt động.
 - Bảng điểm đọc từ server. Thi đấu cần tài khoản, vòng 30 giây, giới hạn server 8 lượt/giây và sequence chống gửi lại. Đây không phải cơ chế ngăn mọi bot.
+- HTML hiện màn chờ ngay khi mở trang, trước khi app tải xong. Sau 8 giây chưa mở được có đường tải lại/hướng dẫn. Không có bộ đếm phần trăm giả, tôn trọng reduced motion.
+
+## Font tự host
+
+Các trang mới dùng `public/fonts-woff2.css`. Tổng 5 font WOFF2 là 188.156 bytes thay cho 618.188 bytes TTF, giảm 69,6% dung lượng font khi tải đủ 5 weight. Chuyển định dạng giữ nguyên mọi ký tự, outline và horizontal metric, không subset tiếng Việt. TTF và stylesheet cũ vẫn được giữ để trang đã cache không gọi font bị mất. License OFL ở `public/fonts/OFL.txt`.
+
+Để tạo lại font bằng Python 3.11 trở lên, dùng virtualenv riêng:
+
+```sh
+python3 -m venv /tmp/hen1chut-fonts
+/tmp/hen1chut-fonts/bin/pip install fonttools==4.67.0 brotli==1.2.0
+/tmp/hen1chut-fonts/bin/python scripts/compress-fonts.py
+```
+
+Script so sánh cmap, glyph coordinates và metric trước/sau. Font đầu ra đã commit nên build bình thường chỉ cần Node.js. Cách chuyển theo [fontTools WOFF2](https://fonttools.readthedocs.io/en/stable/ttLib/woff2.html).
 
 ## Database và public
 
@@ -36,4 +51,6 @@ Quảng cáo và bán cosmetics là hướng kiếm tiền đã chọn, hiện c
 
 Ngày 21/10/2026, 42 tests qua trên 10 files, gồm thực thi migration bằng PostgreSQL WASM, RLS giữa hai tài khoản, từ chối ghi điểm/entitlement trực tiếp, revision conflict và vòng thi đấu server. Browser bản build: 144 tổ hợp 4 nhân vật × 12 đồ chơi × 3 bối cảnh ghi đúng 144 lượt, không console error. Reload giữ 144 lượt, hoodie, mũ len, kính tròn và dấu pháo giấy. Chọn chơi tiếp giữ phiên, mở phiên mới đưa về 0 và xóa dấu, vẫn giữ trang phục. PNG bưu thiếp đã tải được. Đã xem lại bằng khung trình duyệt 320px và 375px, sửa thanh đồ chơi xếp dọc che sân chơi thành hàng ngang có vuốt.
 
-Google OAuth thật, đồng bộ hai thiết bị, thanh toán/quảng cáo live, Lighthouse/FPS và thiết bị iOS/Android thật vẫn cần kiểm chứng riêng. Tests local không thay thế các bằng chứng này. Bản code mới chỉ là bản public sau khi workflow deploy của commit tương ứng thành công.
+Google OAuth production của chủ dự án đã qua vòng login, sync, reload và logout/login. Vòng QA 30 giây ghi nhận 3 lượt trên bảng tổng/7 ngày. Reload ngay sau cú đấm giữ đúng phiên 8 lượt và 8 dấu tác động, sau đó đồng bộ lên server. Chi tiết ở `docs/kiem-chung-2026-10-21.md`.
+
+Đồng bộ hai thiết bị/tài khoản thật, thanh toán/quảng cáo live, Lighthouse/FPS và thiết bị iOS/Android thật vẫn cần kiểm chứng riêng. Tests local không thay thế các bằng chứng này. Bản code mới chỉ là bản public sau khi workflow deploy của commit tương ứng thành công.

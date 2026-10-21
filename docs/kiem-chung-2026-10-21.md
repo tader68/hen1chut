@@ -13,6 +13,8 @@
 - Vòng ranking thật 30 giây bằng tài khoản chủ dự án: 3 thao tác qua UI, server chốt 3 lượt, hiện trên bảng tổng và 7 ngày. SQL read-only xác nhận round_finished true, ranked_hits 3, best_score 3. Đây là vòng QA của chủ dự án, không phải bằng chứng traffic hoặc người chơi độc lập. Ảnh bằng chứng: `/Users/dat.ta/Downloads/app/hen1chut-ranking-verified.png` (nằm ngoài repository).
 - Build TypeScript/Vite qua, 42 tests qua trên 10 files. Bộ SQL tests thực thi cả 3 migration trên PostgreSQL WASM, kiểm tra RLS hai tài khoản, anonymous bị chặn ghi, CAS, sequence, deadline, giới hạn điểm và quyền entitlement. Tests chia sẻ kiểm tra giữ mũ/kính và lời mời qua Google redirect.
 - API sau migration mới: leaderboard HTTP 200, schema nội bộ HTTP 406, anonymous ghi hồ sơ HTTP 401. Advisor không còn WARN về hàm đặc quyền công khai. Hai INFO default-deny bảng điểm có giải thích ở tài liệu kết nối.
+- Startup mới kiểm tra bằng preview build: HTML hiện trạng thái tải trước khi app mount, app mở thành công thì bỏ màn chờ và không có console error. Fixture local cố ý làm module không tải được cho thấy sau 8 giây hiện lời nhắc/nút tải lại ở khung 320px và 375px. Đây là kiểm tra lỗi tải module trong fixture, chưa phải đo mạng 3G/Lighthouse hay điện thoại thật. Fixture chỉ nằm trong dist lúc QA, không deploy.
+- 5 font WOFF2 tổng 188.156 bytes so với TTF 618.188 bytes, giảm 69,6%. Script fontTools đối chiếu toàn bộ cmap, metric và tọa độ glyph đều bằng nhau. TTF cũ vẫn tồn tại cho stylesheet đã cache. Không suy số này thành mức giảm thời gian tải trang hoặc FPS.
 
 ## Chưa được coi là hoàn thành
 
