@@ -5,6 +5,7 @@ import {
 } from "@supabase/supabase-js";
 import { normalizeCharacter, type Character } from "../character/model";
 import { normalizePlayerState, type PlayerState } from "./player-state";
+import { rememberPreset } from "../sharing/preset";
 export type { PlayerState } from "./player-state";
 export interface Profile {
   user_id: string;
@@ -59,8 +60,8 @@ export class Cloud {
   readonly client: SupabaseClient;
   revision = 0;
   constructor(
-    private url: string,
-    private key: string,
+    url: string,
+    key: string,
   ) {
     this.client = createClient(url, key, {
       auth: {
@@ -71,19 +72,6 @@ export class Cloud {
       },
     });
   }
-  async googleAvailable(): Promise<boolean | null> {
-    try {
-      const response = await fetch(`${this.url}/auth/v1/settings`, {
-        headers: { apikey: this.key },
-        signal: AbortSignal.timeout(5000),
-      });
-      if (!response.ok) return null;
-      const settings = await response.json();
-      return settings.external?.google === true;
-    } catch {
-      return null;
-    }
-  }
   async user(): Promise<User | null> {
     const { data, error } = await this.client.auth.getUser();
     if (error) {
@@ -93,6 +81,7 @@ export class Cloud {
     return data.user;
   }
   async signIn(): Promise<void> {
+    rememberPreset(location.href);
     const redirect = new URL(import.meta.env.BASE_URL, location.href);
     redirect.hash = "";
     redirect.search = "";

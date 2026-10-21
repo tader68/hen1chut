@@ -16,6 +16,16 @@
 - Startup mới kiểm tra bằng preview build: HTML hiện trạng thái tải trước khi app mount, app mở thành công thì bỏ màn chờ và không có console error. Fixture local cố ý làm module không tải được cho thấy sau 8 giây hiện lời nhắc/nút tải lại ở khung 320px và 375px. Đây là kiểm tra lỗi tải module trong fixture, chưa phải đo mạng 3G/Lighthouse hay điện thoại thật. Fixture chỉ nằm trong dist lúc QA, không deploy.
 - 5 font WOFF2 tổng 188.156 bytes so với TTF 618.188 bytes, giảm 69,6%. Script fontTools đối chiếu toàn bộ cmap, metric và tọa độ glyph đều bằng nhau. TTF cũ vẫn tồn tại cho stylesheet đã cache. Không suy số này thành mức giảm thời gian tải trang hoặc FPS.
 
+## Nâng cấp guest, chuyển động và bối cảnh
+
+- 52 tests qua trên 14 files. Các tests mới kiểm tra chọn luồng khôi phục tài khoản, marker nhập guest một lần, keyframe chuyển động, 6 phản ứng và lưu khám phá qua ngày. Build TypeScript/Vite qua.
+- Preview cho người chưa có tài khoản mở thẳng sân chơi, không có form hoặc yêu cầu Google. Mở bảng xếp hạng đọc được nickname/điểm thật, nút đăng nhập chỉ dành cho thi đấu.
+- Guest → Google bằng tài khoản chủ dự án → màn chọn phiên đã chạy qua OAuth thật tại `127.0.0.1:4173`. Chọn dùng phiên tài khoản giữ đúng số lượt hiện tại của tài khoản, không ghi đè bằng 11 lượt guest. Tại thời điểm kiểm tra này cả browser production và SQL read-only đều có phiên tài khoản 0 lượt, revision 10, khác phiên 8 lượt ở lượt QA trước. Không khôi phục dữ liệu cũ đè lên phiên hiện hành.
+- Sáu phản ứng khám phá đã thử qua UI trên guest preview, sổ đạt 6/6 và vẫn giữ 6/6 sau reload. Đây là lượt kiểm tra, không phải người chơi độc lập.
+- Công sở và Sân bóng chạy 96 tổ hợp 4 nhân vật × 12 đồ chơi × 2 cảnh. Thêm 8 thao tác lặp trước khi sửa danh sách selector của script QA, tổng bộ đếm guest từ 3 lên 107. Console không có error, reload giữ 107 và cảnh Sân bóng. Không ghi các lượt này vào bảng production.
+- Khung browser 320px và 375px hiển thị đầy đủ sân chơi và hàng bối cảnh có vuốt ngang, xem được Công sở/Sân bóng. Không phải kiểm tra trên điện thoại thật.
+- Chưa kiểm tra end-to-end nhánh chọn nhập guest vào tài khoản đã có phiên. Nhánh chọn giữ phiên tài khoản đã qua. Không suy kết quả nhánh này thành chứng minh cả hai lựa chọn.
+
 ## Chưa được coi là hoàn thành
 
 - Chưa kiểm tra sync bằng hai thiết bị hoặc vòng global của hai tài khoản thật. Kiểm tra RLS hai tài khoản hiện là SQL tests local, không thay cho kiểm tra production hai người chơi.

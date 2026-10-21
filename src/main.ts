@@ -1,23 +1,30 @@
 import "./style.css";
 import { mountStage } from "./stage/stage";
-import { onboard } from "./ui/onboarding";
+import { onboard, guestAccount } from "./ui/onboarding";
+import { needsAccountRestore } from "./platform/entry";
+import type { Cloud } from "./platform/cloud";
 import { cloudConfig, cloudConfigured } from "./platform/config";
 import { rememberPreset, recoverPreset } from "./sharing/preset";
 const root = document.getElementById("app")!;
+let cloudPromise: Promise<Cloud> | undefined;
+const connectCloud = cloudConfigured ? () => {
+  cloudPromise ||= import("./platform/cloud")
+    .then(({ Cloud }) => new Cloud(cloudConfig.url!, cloudConfig.key!))
+    .catch(error => { cloudPromise = undefined; throw error; });
+  return cloudPromise;
+} : undefined;
 async function start(): Promise<void> {
   rememberPreset(location.href);
-  let cloud;
-  if (cloudConfigured) {
-    const { Cloud } = await import("./platform/cloud");
-    cloud = new Cloud(cloudConfig.url!, cloudConfig.key!);
+  let restore = false;
+  if (connectCloud) {
+    try { restore = needsAccountRestore(cloudConfig.url!, location.href, localStorage); }
+    catch { restore = new URL(location.href).searchParams.has("code"); }
   }
   const status = root.querySelector("[data-startup-status]");
-  if (status && cloud) status.textContent = "Đang tải tài khoản và phiên chơi…";
-  const account = await onboard(
-    root,
-    cloud,
-    cloud ? await cloud.googleAvailable() : false,
-  );
+  if (status && restore) status.textContent = "Đang tải tài khoản và phiên chơi…";
+  const account = restore && connectCloud
+    ? await onboard(root, await connectCloud())
+    : guestAccount(connectCloud);
   const resumed = recoverPreset(location.href);
   if (resumed !== location.href) history.replaceState(null, "", resumed);
   mountStage(root, account);

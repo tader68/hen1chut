@@ -12,11 +12,13 @@ import { mountCloset } from "../ui/closet";
 import { mountRanking } from "../ui/ranking";
 import type { AccountContext } from "../ui/onboarding";
 import type { PlayerState } from "../platform/cloud";
+import { requestGuestImport } from "../platform/guest-import";
 import { savePending, clearPending } from "../platform/pending-state";
 import {
   loadCharacter,
   saveCharacter,
   normalizeCharacter,
+  defaultCharacter,
   escapeHtml,
   kinds,
   colors,
@@ -30,6 +32,7 @@ import {
 } from "../character/model";
 import { Particles } from "../fx/particles";
 import { impactMotion } from "../fx/motion";
+import { animatePuppet, capturePuppetPose } from "../fx/puppet";
 import { tools, toolArt, type ToolId } from "../tools/registry";
 import { scenes, sceneArt, type SceneId } from "../env/scenes";
 import { Sound } from "../audio/synth";
@@ -71,7 +74,7 @@ export function mountStage(
   }
   root.innerHTML = `
   <div class="app-shell">
-    <header class="topbar"><a class="brand" href="./" aria-label="Hẹn 1 chút, trang chủ"><span class="brand-mark"><i></i><i></i><b></b></span>hẹn<span>1</span>chút<span class="brand-dot">.</span></a><span class="brand-note">Một chút cho mình (ra đây nói chuyện 1 chút...)</span><div class="header-actions"><button class="quiet-button ranking-button" id="ranking-open" aria-label="Mở bảng xếp hạng">Bảng xếp hạng</button><button class="account-pill" id="account-open">${escapeHtml(account.nickname)}</button><button class="quiet-button" id="share" aria-label="Chia sẻ Hẹn 1 chút">${icon("share")}<span>Chia sẻ</span></button><button class="icon-button" id="sound" type="button"></button></div></header>
+    <header class="topbar"><a class="brand" href="./" aria-label="Hẹn 1 chút, trang chủ"><span class="brand-mark"><i></i><i></i><b></b></span>hẹn<span>1</span>chút<span class="brand-dot">.</span></a><span class="brand-note">Một chút cho mình (ra đây nói chuyện 1 chút...)</span><div class="header-actions"><button class="quiet-button ranking-button" id="ranking-open" aria-label="Mở bảng xếp hạng">Bảng xếp hạng</button><button class="account-pill" id="account-open" ${account.userId ? "" : 'aria-label="Lưu phiên bằng Google"'}>${account.userId ? escapeHtml(account.nickname) : '<span class="guest-label-full">Lưu phiên</span><span class="guest-label-short" aria-hidden="true">Lưu</span>'}</button><button class="quiet-button" id="share" aria-label="Chia sẻ Hẹn 1 chút">${icon("share")}<span>Chia sẻ</span></button><button class="icon-button" id="sound" type="button"></button></div></header>
     <main>
       <section class="intro"><div><p class="intro-note"><span></span>Chỗ nhỏ cho một ngày hơi lớn</p><h1>Bực một chút.<br class="mobile-break"/> <span>Nhẹ đi nhiều.</span></h1><p>Cứ để bực bội ở đây. Chọn một món, chạm một cái, thở ra nào.</p></div><span class="intro-doodle" aria-hidden="true"><svg viewBox="0 0 120 95"><path d="M10 35q13 39 56 26 23-7 16-27-7-13-16-4-11 17 14 25 17 4 31-13m-14 1 15-3-5 15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>mọi thứ rồi sẽ ổn.</span></section>
       <div class="playground">
@@ -84,7 +87,7 @@ export function mountStage(
       </div>
       <footer class="footer"><p>Chỉ là hoạt hình. Chỉ để nhẹ lòng.</p><span><a href="./huong-dan.html">Cách chơi</a> · <a href="./quyen-rieng-tu.html">Quyền riêng tư</a> · <a href="./ve-hen1chut.html">Về Hẹn 1 chút</a> · <a href="./dieu-khoan.html">Điều khoản</a></span><p>Hẹn bạn một ngày dịu hơn.</p></footer>
     </main>
-    <dialog id="breathing" class="breathing-dialog" aria-labelledby="breath-label" aria-describedby="breath-description"><form method="dialog"><button class="icon-button close-dialog" aria-label="Đóng bài thở">×</button><p>Cho mình một khoảng nghỉ.</p><h2 id="breath-label">Hít vào…</h2><div class="breath-orb" aria-hidden="true"></div><p id="breath-description">Hít vào chậm trong 4 giây.</p><button class="breathe-button" value="done">Mình thấy nhẹ hơn rồi ${icon("heart")}</button></form></dialog><dialog id="session-summary" class="compact-dialog" aria-labelledby="summary-title"><button class="icon-button dialog-close" id="summary-close" aria-label="Tiếp tục phiên chơi">×</button><p class="intro-note">Một chút của bạn</p><h2 id="summary-title">Khép lại phiên này?</h2><p>Bạn đã gửi lại <b id="summary-hits"></b> chút bực bội. Mở phiên mới sẽ đưa nhân vật về ban đầu và xóa các vết tác động của phiên này.</p><div class="dialog-actions"><button id="summary-keep" class="secondary-button">Chơi tiếp phiên này</button><button id="session-new" class="primary-button">Kết thúc & mở phiên mới</button></div></dialog><dialog id="account-dialog" class="compact-dialog" aria-labelledby="account-title"><button class="icon-button dialog-close" id="account-close" aria-label="Đóng hồ sơ">×</button><p class="intro-note">Góc của bạn</p><h2 id="account-title">${escapeHtml(account.nickname)}</h2><p>${account.cloud ? "Đã kết nối Google. Nickname và điểm có thể xuất hiện trên bảng toàn cầu. Tên nhân vật và phiên chơi chỉ tài khoản của bạn truy cập được." : "Bạn đang chơi trên thiết bị này. Nhân vật và phiên chơi được giữ trong trình duyệt. Đăng nhập Google sẽ mở sau khi hoàn tất cấu hình. Bạn vẫn xem được bảng điểm online khi có kết nối."}</p><p class="sync-status" id="sync-status" role="status">Đã lưu trên máy</p>${account.cloud ? '<button class="secondary-button" id="logout">Đăng xuất Google</button>' : ""}</dialog><dialog id="sync-conflict" class="compact-dialog" aria-labelledby="conflict-title"><h2 id="conflict-title">Có một phiên mới hơn.</h2><p>Thiết bị khác vừa đồng bộ. Chọn phiên muốn giữ để không ghi đè ngoài ý muốn.</p><div class="dialog-actions"><button class="secondary-button" id="use-cloud">Dùng phiên đã đồng bộ</button><button class="primary-button" id="use-device">Giữ phiên trên máy này</button></div></dialog><div class="ranked-banner" id="ranked-banner" hidden></div><div class="toast" id="toast" role="status"></div>
+    <dialog id="breathing" class="breathing-dialog" aria-labelledby="breath-label" aria-describedby="breath-description"><form method="dialog"><button class="icon-button close-dialog" aria-label="Đóng bài thở">×</button><p>Cho mình một khoảng nghỉ.</p><h2 id="breath-label">Hít vào…</h2><div class="breath-orb" aria-hidden="true"></div><p id="breath-description">Hít vào chậm trong 4 giây.</p><button class="breathe-button" value="done">Mình thấy nhẹ hơn rồi ${icon("heart")}</button></form></dialog><dialog id="session-summary" class="compact-dialog" aria-labelledby="summary-title"><button class="icon-button dialog-close" id="summary-close" aria-label="Tiếp tục phiên chơi">×</button><p class="intro-note">Một chút của bạn</p><h2 id="summary-title">Khép lại phiên này?</h2><p>Bạn đã gửi lại <b id="summary-hits"></b> chút bực bội. Mở phiên mới sẽ đưa nhân vật về ban đầu và xóa các vết tác động của phiên này.</p><div class="dialog-actions"><button id="summary-keep" class="secondary-button">Chơi tiếp phiên này</button><button id="session-new" class="primary-button">Kết thúc & mở phiên mới</button></div></dialog><dialog id="account-dialog" class="compact-dialog" aria-labelledby="account-title"><button class="icon-button dialog-close" id="account-close" aria-label="Đóng hồ sơ">×</button><p class="intro-note">Góc của bạn</p><h2 id="account-title">${escapeHtml(account.nickname)}</h2><p>${account.cloud ? "Đã kết nối Google. Nickname và điểm có thể xuất hiện trên bảng toàn cầu. Tên nhân vật và phiên chơi chỉ tài khoản của bạn truy cập được." : "Bạn đang chơi trên thiết bị này, không cần tài khoản. Đăng nhập Google để lưu sang thiết bị khác hoặc tham gia ranking. Phiên đã chơi trên máy vẫn được giữ để bạn chọn mang theo."}</p><p class="sync-status" id="sync-status" role="status">Đã lưu trên máy</p>${account.cloud ? '<button class="secondary-button" id="logout">Đăng xuất Google</button>' : account.connectCloud ? '<button class="primary-button" id="account-login">Lưu bằng Google</button><p class="field-help">Chỉ xin tên, ảnh hồ sơ và email để đăng nhập, không đọc Gmail.</p>' : ""}</dialog><dialog id="sync-conflict" class="compact-dialog" aria-labelledby="conflict-title"><h2 id="conflict-title">Có một phiên mới hơn.</h2><p>Thiết bị khác vừa đồng bộ. Chọn phiên muốn giữ để không ghi đè ngoài ý muốn.</p><div class="dialog-actions"><button class="secondary-button" id="use-cloud">Dùng phiên đã đồng bộ</button><button class="primary-button" id="use-device">Giữ phiên trên máy này</button></div></dialog><div class="ranked-banner" id="ranked-banner" hidden></div><div class="toast" id="toast" role="status"></div>
   </div>`;
   const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
     root.querySelector<T>(selector)!;
@@ -99,6 +102,12 @@ export function mountStage(
     combo = 0,
     mood: Mood = session.mood,
     toastTimer: ReturnType<typeof setTimeout>;
+  let puppetAnimations: Animation[] = [];
+  const cancelMotion = () => {
+    puppetAnimations.forEach(animation => animation.cancel());
+    puppetAnimations = [];
+    figure.getAnimations().forEach(animation => animation.cancel());
+  };
   const toast = (message: string) => {
     $("#toast").textContent = message;
     $("#toast").classList.add("visible");
@@ -195,6 +204,8 @@ export function mountStage(
         .querySelectorAll<HTMLElement>("button[data-scene]")
         .forEach((b) => b.setAttribute("aria-pressed", String(b === el)));
       particles.clear();
+      const tabs = el.parentElement!;
+      tabs.scrollTo({ left: el.offsetLeft - tabs.offsetLeft - (tabs.clientWidth - el.offsetWidth) / 2, behavior: reduceMotion.matches ? "auto" : "smooth" });
     }),
   );
   root.querySelectorAll<HTMLElement>("[data-kind]").forEach((el) =>
@@ -250,6 +261,7 @@ export function mountStage(
     soundButton();
   });
   const reset = () => {
+    cancelMotion();
     clearTimeout(recovery);
     session = newSession();
     state = { hits: 0, mood: "normal" };
@@ -289,6 +301,9 @@ export function mountStage(
     $<HTMLDialogElement>("#session-summary").close();
   });
   const hit = (clientX?: number, clientY?: number) => {
+    const carried = puppetAnimations.length ? capturePuppetPose(figure) : undefined;
+    const carriedFigure = puppetAnimations.length ? getComputedStyle(figure).transform : undefined;
+    cancelMotion();
     const now = performance.now();
     combo = now - lastHit < 850 ? Math.min(combo + 1, 99) : 1;
     lastHit = now;
@@ -313,6 +328,7 @@ export function mountStage(
             : clientY - bounds.top,
         ),
       );
+    const previousTool = session.marks.at(-1)?.tool;
     session = addImpact(
       session,
       selected,
@@ -321,12 +337,12 @@ export function mountStage(
     );
     state = { hits: session.hits, mood: session.mood };
     mood = session.mood;
-    companion.recordHit(selected);
+    const discovery = companion.recordHit(selected, { previousTool, kind: character.kind, scene });
     ranking.recordHit();
     draw();
     clearTimeout(recovery);
     $("#instruction").classList.add("hidden");
-    $("#speech").textContent = [
+    $("#speech").textContent = discovery?.line || [
       "Cứ để mình lo!",
       "Bực bội bay đi!",
       "Thấy đỡ hơn chưa?",
@@ -343,32 +359,61 @@ export function mountStage(
     $("#combo").textContent = combo >= 3 ? `×${combo} liên tiếp!` : "";
     if (!reduceMotion.matches) {
       figure.getAnimations().forEach((a) => a.cancel());
-      const motion = impactMotion(selected, scene === "space");
+      const reactionTool = discovery?.motion || selected;
+      const direction = clientX === undefined ? (session.hits % 2 ? 1 : -1) : clientX < fr.left + fr.width / 2 ? 1 : -1;
+      const motion = impactMotion(reactionTool, scene === "space", direction);
+      if (carriedFigure) motion.figure[0] = { ...motion.figure[0], transform: carriedFigure };
       figure.animate(motion.figure, {
         duration: motion.duration,
         easing: "cubic-bezier(.2,.7,.25,1)",
       });
+      puppetAnimations = animatePuppet(figure, reactionTool, direction, motion.duration, carried);
+      const ball = scene === "football" && selected === "boot" ? root.querySelector(".pitch-ball") : null;
+      if (ball) puppetAnimations.push(ball.animate([
+        {transform:"none"},
+        {transform:"translate(35px,-65px) rotate(95deg)",offset:.35},
+        {transform:"translate(60px,0) rotate(170deg)",offset:.65},
+        {transform:"translate(25px,-16px) rotate(220deg)",offset:.82},
+        {transform:"none"},
+      ],{duration:800,easing:"ease-out"}));
+      const papers = scene === "office" ? root.querySelector(".office-papers") : null;
+      if (papers) puppetAnimations.push(papers.animate([
+        {transform:"none"},
+        {transform:"translate(4px,-8px) rotate(8deg)",offset:.28},
+        {transform:"none"},
+      ],{duration:450,easing:"ease-out"}));
+      const shadow = root.querySelector(".figure-ground");
+      if (shadow) puppetAnimations.push(shadow.animate([
+        {transform:"translateX(-50%) scale(1)"},
+        {transform:`translateX(-50%) scale(${selected === "confetti" || selected === "lightning" ? ".7,.8" : "1.18,.85"})`,offset:.25},
+        {transform:"translateX(-50%) scale(1)"},
+      ], {duration:motion.duration,easing:"ease-out"}));
       const weapon = $("#impact-tool");
       weapon.getAnimations().forEach((a) => a.cancel());
       weapon.innerHTML = toolArt(selected);
       weapon.style.left = `${x}px`;
       weapon.style.top = `${y}px`;
-      weapon.animate(motion.weapon, { duration: 380, easing: "ease-out" });
+      weapon.animate(impactMotion(selected, scene === "space", direction).weapon, { duration: 380, easing: "ease-out" });
       const ring = document.createElement("span");
       ring.className = `impact-ring ${selected}`;
       ring.style.left = `${x}px`;
       ring.style.top = `${y}px`;
+      arena.querySelectorAll(".impact-ring").forEach(el => el.remove());
       arena.append(ring);
       setTimeout(() => ring.remove(), 600);
     }
     const pop = document.createElement("div");
     pop.className = "pop";
+    pop.setAttribute("aria-hidden", "true");
     pop.textContent = tool.words[Math.floor(Math.random() * tool.words.length)];
-    pop.style.left = `${Math.max(90, Math.min(bounds.width - 90, x))}px`;
-    pop.style.top = `${Math.max(110, y - 70)}px`;
+    const popX = x + (session.hits % 2 ? 1 : -1) * Math.min(110, bounds.width * .28);
+    pop.style.left = `${Math.max(72, Math.min(bounds.width - 72, popX))}px`;
+    pop.style.top = `${Math.max(90, y - 60)}px`;
+    arena.querySelectorAll(".pop").forEach(el => el.remove());
     arena.append(pop);
     setTimeout(() => pop.remove(), 800);
     recovery = setTimeout(() => {
+      cancelMotion();
       mood = session.mood;
       draw();
       $("#combo").textContent = "";
@@ -383,6 +428,21 @@ export function mountStage(
   });
   figure.addEventListener("click", (e) => {
     if (e.detail === 0) hit();
+  });
+  figure.addEventListener("pointermove", event => {
+    if (reduceMotion.matches || event.pointerType === "touch") return;
+    const rect = figure.getBoundingClientRect();
+    const x = Math.max(-1, Math.min(1, (event.clientX - rect.left) / rect.width * 2 - 1));
+    const y = Math.max(-1, Math.min(1, (event.clientY - rect.top) / rect.height * 2 - 1));
+    figure.style.setProperty("--look-x", `${x * 3}px`);
+    figure.style.setProperty("--look-y", `${y * 2}px`);
+  });
+  figure.addEventListener("pointerleave", () => {
+    figure.style.setProperty("--look-x", "0px");
+    figure.style.setProperty("--look-y", "0px");
+  });
+  reduceMotion.addEventListener("change", () => {
+    if (reduceMotion.matches) { cancelMotion(); particles.clear(); }
   });
   document.addEventListener("keydown", (e) => {
     if (
@@ -423,6 +483,7 @@ export function mountStage(
   });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      cancelMotion();
       particles.clear();
       audio.mute();
       saveSnapshot();
@@ -524,11 +585,29 @@ export function mountStage(
       persist();
     },
   );
+  let signingIn = false;
+  const signIn = async () => {
+    if (!account.connectCloud || signingIn) return;
+    signingIn = true;
+    const login = root.querySelector<HTMLButtonElement>("#account-login");
+    if (login) { login.disabled = true; login.textContent = "Đang mở Google…"; }
+    saveSnapshot();
+    const changedCharacter = (Object.keys(defaultCharacter) as (keyof Character)[]).some(k => character[k] !== defaultCharacter[k]);
+    if (session.hits > 0 || changedCharacter || scene !== "studio") requestGuestImport(session.id);
+    try { await (await account.connectCloud()).signIn(); }
+    catch {
+      signingIn = false;
+      if (login) { login.disabled = false; login.textContent = "Lưu bằng Google"; }
+      toast("Chưa mở được Google. Phiên vẫn lưu trên máy, thử lại khi có mạng nhé.");
+    }
+  };
+  root.querySelector("#account-login")?.addEventListener("click", () => void signIn());
   const ranking = mountRanking(
     root,
     account.cloud || account.publicCloud,
     toast,
     account.userId,
+    { connectCloud: account.connectCloud, onSignIn: account.connectCloud ? () => void signIn() : undefined },
   );
   $("#account-open").addEventListener("click", () =>
     $<HTMLDialogElement>("#account-dialog").showModal(),

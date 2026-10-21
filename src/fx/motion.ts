@@ -6,6 +6,7 @@ const frame = (transform: string, offset?: number): Keyframe => ({
 export function impactMotion(
   id: ToolId,
   space = false,
+  direction?: number,
 ): { figure: Keyframe[]; weapon: Keyframe[]; duration: number } {
   const figures: Record<ToolId, Keyframe[]> = {
     hammer: [
@@ -140,9 +141,19 @@ export function impactMotion(
                 transform: "translate(25px,-85px) rotate(-20deg) scale(.7)",
               },
             ];
+  const mirror = (frames: Keyframe[], centerWeapon = false): Keyframe[] => frames.map(keyframe => ({
+    ...keyframe,
+    transform: String(keyframe.transform || "none")
+      .replace(/translateX\((-?[\d.]+)px\)/g, (_, x) => `translateX(${-Number(x)}px)`)
+      .replace(/translate\((-?[\d.]+)px,/g, (_, x) => `translate(${-Number(x) - (centerWeapon ? 105 : 0)}px,`)
+      .replace(/rotate\((-?[\d.]+)deg\)/g, (_, angle) => `rotate(${-Number(angle)}deg)`),
+  }));
+  const side = direction === undefined ? undefined : direction < 0 ? -1 : 1;
+  const bodySide = id === "pillow" || id === "slipper" ? -1 : 1;
+  const weaponSide = isPunch ? 1 : -1;
   return {
-    figure: figures[id],
-    weapon,
+    figure: side !== undefined && side !== bodySide ? mirror(figures[id]) : figures[id],
+    weapon: side !== undefined && id !== "lightning" && side !== weaponSide ? mirror(weapon, true) : weapon,
     duration:
       (id === "banana"
         ? 650

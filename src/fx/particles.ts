@@ -36,7 +36,8 @@ export class Particles {
       banana: ["#e9ce67", "#fff2ac", "#fff"],
       confetti: ["#c7a1df", "#f1bcce", "#9dcdbb"],
     };
-    for (let i = 0; i < (gentle ? 6 : 26) && this.list.length < 160; i++) {
+    const count = gentle ? 6 : type === "confetti" ? 26 : type === "water" || type === "tomato" ? 20 : 14;
+    for (let i = 0; i < count && this.list.length < 110; i++) {
       const angle = Math.random() * Math.PI * 2,
         speed = gentle ? 28 : 70 + Math.random() * 200;
       this.list.push({
@@ -46,7 +47,7 @@ export class Particles {
         vy: Math.sin(angle) * speed - 70,
         life: 0,
         max: 0.45 + Math.random() * 0.45,
-        size: 3 + Math.random() * 7,
+        size: 2 + Math.random() * (type === "confetti" ? 7 : 5),
         color: palette[type][i % 3],
         angle,
         type,
@@ -86,9 +87,20 @@ export class Particles {
             r = n % 2 ? p.size * 0.4 : p.size;
           ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
         }
-      } else if (p.type === "pillow")
-        ctx.ellipse(0, 0, p.size, p.size * 0.3, 0, 0, Math.PI * 2);
-      else ctx.ellipse(0, 0, p.size * 0.65, p.size, 0, 0, Math.PI * 2);
+      } else if (p.type === "confetti") {
+        ctx.rect(-p.size * .6, -p.size * .25, p.size * 1.2, p.size * .5);
+      } else if (p.type === "water") {
+        ctx.moveTo(0, -p.size);
+        ctx.bezierCurveTo(-p.size, p.size * .2, -p.size * .6, p.size, 0, p.size);
+        ctx.bezierCurveTo(p.size * .6, p.size, p.size, p.size * .2, 0, -p.size);
+      } else if (p.type === "pillow") {
+        ctx.moveTo(-p.size, 0);
+        ctx.quadraticCurveTo(0, -p.size, p.size, 0);
+        ctx.quadraticCurveTo(0, p.size * .6, -p.size, 0);
+      } else if (p.type === "banana") {
+        ctx.arc(0, 0, p.size, .15, Math.PI - .15);
+        ctx.arc(0, -p.size * .25, p.size * .8, Math.PI - .15, .15, true);
+      } else ctx.ellipse(0, 0, p.size * 0.65, p.size, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }

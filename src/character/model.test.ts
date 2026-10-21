@@ -51,6 +51,6 @@ describe("rendering coverage", () => {
   });
   it("has distinct art and valid definitions for every tool and scene", () => {
     expect(new Set(tools.map((t) => toolArt(t.id))).size).toBe(tools.length);
-    expect(new Set(scenes.map((s) => sceneArt(s.id))).size).toBe(3);
+    expect(new Set(scenes.map((s) => sceneArt(s.id))).size).toBe(scenes.length);
   });
 });

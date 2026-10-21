@@ -18,4 +18,13 @@ describe("toy motion", () => {
         impactMotion(tool.id).duration,
       );
   });
+  it("keeps the weapon and recoil on the intended side without mirroring the character art", () => {
+    const right = impactMotion("boxing", false, 1);
+    const left = impactMotion("boxing", false, -1);
+    expect(right.figure[1].transform).toContain("translate(46px");
+    expect(left.figure[1].transform).toContain("translate(-46px");
+    expect(right.weapon[0].transform).toContain("translate(-170px");
+    expect(left.weapon[0].transform).toContain("translate(65px");
+    expect(JSON.stringify(left.figure)).not.toContain("scale(-1");
+  });
 });

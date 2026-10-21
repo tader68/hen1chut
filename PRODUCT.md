@@ -12,10 +12,12 @@ web
 
 - Thương hiệu: `hẹn1chút.`. Dòng cạnh logo: `Một chút cho mình (ra đây nói chuyện 1 chút...)`.
 - Kiếm tiền bằng quảng cáo và bán bộ nhân vật/trang phục/phụ kiện. Không chọn hướng ủng hộ tự nguyện.
-- Luồng đầu: Google login, nickname, tên nhân vật muốn đấm. Không làm textbox Gmail giả thay cho xác thực.
+- Quyết định mới ngày 21/10: vào chơi ngay bằng guest với nhân vật mặc định, đặt tên tùy ý. Google chỉ khi muốn đồng bộ hoặc thi đấu ranking. Sau Google mới tạo nickname nếu chưa có hồ sơ, cho chọn mang theo phiên guest.
 - Bảng xếp hạng global có dữ liệu server thật. Không seed người chơi/điểm giả trên production.
 - Database phải dùng gói Free, chưa có quyền nâng cấp hoặc bật billing.
+- Animation cần đẹp và có cảm giác tác động rõ, cùng cơ chế khám phá dựa trên nghiên cứu về động lực chơi. Không coi thời gian chơi dài là bằng chứng người dùng thích.
 - Phiên chưa kết thúc phải giữ số lượt, biểu cảm, các vết tác động, trang phục và lựa chọn đang dùng qua reload/quay lại.
+- Thêm cả môi trường công sở và sân bóng, có chuyển động riêng, đổi cảnh không reset phiên.
 - Mở rộng đồ chơi, có găng đấm/nắm đấm và nhiều món khác. Có nhiều trang phục, phụ kiện. Cục bực cần nhận diện riêng.
 
 ## Implementation choices
@@ -23,8 +25,9 @@ web
 - Giữ static frontend GitHub Pages đang public. Supabase Free cung cấp Google Auth và PostgreSQL.
 - Nickname, ngoại hình công khai ở leaderboard. Email thuộc Auth, tên nhân vật và phiên thuộc dữ liệu riêng có RLS.
 - Vòng global 30 giây độc lập với bộ đếm tự do. Điểm do RPC nhận lượt với giới hạn 8 lượt/giây server, sequence chống replay, không có API nhận `score` từ client. Cơ chế không chứng minh người thật hoặc ngăn toàn bộ auto-click.
+- Đã chọn VietQR/chuyển khoản cho người chơi Việt Nam. Checkout tạm xếp sau animation/guest entry. Chưa mở tài khoản thanh toán hoặc kết nối ngân hàng.
 - Tất cả đồ hiện có cho thử miễn phí. Đồ trả phí tương lai cần entitlement do webhook thanh toán đã xác minh cấp, không mở khóa bằng flag client.
-- Bản chưa cấu hình backend có thể trải nghiệm local, nhập nickname và tên nhân vật. Không gọi đây là Google login/global ranking đã hoạt động.
+- Guest chơi ngay cả khi chưa cấu hình backend, có thể đặt tên nhân vật. Không gọi đây là Google login/global ranking đã hoạt động.
 
 ## Ý tưởng đang trao đổi
 

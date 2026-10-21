@@ -1,4 +1,5 @@
 import { tools, type ToolId } from "../tools/registry";
+import { normalizeDiscoveries, type DiscoveryId } from "./discoveries";
 const STORAGE = "hen1chut.daily.v1";
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 export interface DailyProgress {
@@ -7,6 +8,7 @@ export interface DailyProgress {
   tools: ToolId[];
   breathed: boolean;
   completedDays: string[];
+  discoveries?: DiscoveryId[];
 }
 export function localDay(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -47,6 +49,7 @@ export function normalizeProgress(
           .sort()
           .slice(-90)
       : [],
+    discoveries: normalizeDiscoveries(v.discoveries),
   };
 }
 export function dailyTasks(
@@ -78,14 +81,15 @@ export function isDailyComplete(progress: DailyProgress): boolean {
 }
 export function recordProgress(
   progress: DailyProgress,
-  event: { type: "hit"; tool: ToolId } | { type: "breath" },
+  event: { type: "hit"; tool: ToolId } | { type: "breath" } | { type: "discovery"; id: DiscoveryId },
   day = localDay(),
 ): DailyProgress {
   const next = normalizeProgress(progress, day);
   if (event.type === "hit") {
     next.hits++;
     if (!next.tools.includes(event.tool)) next.tools.push(event.tool);
-  } else next.breathed = true;
+  } else if (event.type === "breath") next.breathed = true;
+  else next.discoveries = normalizeDiscoveries([...(next.discoveries || []), event.id]);
   if (isDailyComplete(next) && !next.completedDays.includes(day))
     next.completedDays.push(day);
   return next;

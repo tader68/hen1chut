@@ -13,6 +13,8 @@ import { presetUrl, parsePreset } from "../sharing/preset";
 import type { Character } from "../character/model";
 import type { SceneId } from "../env/scenes";
 import type { ToolId } from "../tools/registry";
+import { toolArt } from "../tools/registry";
+import { discoveries, findDiscovery, type DiscoveryContext } from "../progress/discoveries";
 interface CompanionOptions {
   getCharacter: () => Character;
   getScene: () => SceneId;
@@ -34,6 +36,10 @@ export function mountCompanion(root: HTMLElement, options: CompanionOptions) {
   const dialogs = document.createElement("div");
   dialogs.innerHTML = `<dialog id="postcard" class="postcard-dialog" aria-labelledby="postcard-title"><button class="icon-button dialog-close" id="postcard-close" aria-label="Đóng bưu thiếp">×</button><div class="postcard-preview"><img id="postcard-preview" alt="Bưu thiếp Hẹn 1 chút có nhân vật bạn đang chơi"/></div><div class="postcard-copy"><p class="intro-note">Một chút của bạn, gửi cho ai đó</p><h2 id="postcard-title">Gửi nhẹ lòng đi.</h2><p>Một tấm thiệp nhỏ, kèm người bạn hứng bực đang mặc đúng bộ đồ bạn chọn.</p><label class="check-label"><input type="checkbox" id="postcard-name"/>Kèm tên nhân vật trên ảnh</label><p class="field-help">Mặc định không đưa tên riêng vào ảnh hoặc link.</p><button class="primary-button" id="postcard-share" disabled>Chia sẻ ảnh</button><button class="secondary-button" id="postcard-download" disabled>Tải ảnh PNG</button><button class="quiet-button" id="postcard-link">Chép link người bạn này</button><p id="postcard-status" class="field-help" role="status">Đang vẽ thiệp cho bạn…</p></div></dialog><dialog id="shared-preset" class="compact-dialog" aria-labelledby="preset-title"><p class="intro-note">Bạn có một lời hẹn</p><h2 id="preset-title">Có người gửi bạn<br/>một chút nhẹ lòng.</h2><p>Đón người bạn mới vào sân chơi? Nhân vật và trang phục sẽ đổi theo món quà, phiên chơi đang có vẫn được giữ.</p><div class="dialog-actions"><button class="secondary-button" id="preset-dismiss">Giữ bạn của mình</button><button class="primary-button" id="preset-accept">Đón bạn mới</button></div></dialog>`;
   root.append(dialogs);
+  const book = document.createElement("div");
+  book.className = "discovery-book";
+  book.innerHTML = '<button class="quiet-button" id="discovery-toggle" aria-expanded="false" aria-controls="discovery-list">Sổ của Bự <span id="discovery-count">0/6 chuyện nhỏ</span></button><ul id="discovery-list" hidden></ul>';
+  holder.append(book);
   const $ = <T extends HTMLElement = HTMLElement>(s: string) =>
     root.querySelector<T>(s)!;
   const update = () => {
@@ -56,7 +62,21 @@ export function mountCompanion(root: HTMLElement, options: CompanionOptions) {
       ? `Bạn đã dành ${progress.completedDays.length} ngày dành một chút cho mình.`
       : "Ba gợi ý nhỏ, không cần phải làm hết. Tiến trình lưu riêng cho bạn.";
     holder.classList.toggle("daily-complete", isDailyComplete(progress));
+    $("#discovery-count").textContent = `${progress.discoveries?.length || 0}/6 chuyện nhỏ`;
+    if (!$("#discovery-list").hidden) drawDiscoveries();
   };
+  const drawDiscoveries = () => {
+    $("#discovery-list").innerHTML = discoveries.map(discovery => {
+      const found = progress.discoveries?.includes(discovery.id);
+      return `<li class="${found ? "discovered" : ""}"><span class="discovery-art" aria-hidden="true">${toolArt(discovery.tool)}</span><div><b>${found ? discovery.name : "Một chuyện chưa gặp"}</b><p>${found ? discovery.line : discovery.clue}</p></div><span class="discovery-state">${found ? "Đã gặp" : "Thử nhé"}</span></li>`;
+    }).join("");
+  };
+  $("#discovery-toggle").addEventListener("click", () => {
+    const open = $("#discovery-list").hidden;
+    $("#discovery-list").hidden = !open;
+    $("#discovery-toggle").setAttribute("aria-expanded", String(open));
+    if (open) drawDiscoveries();
+  });
   const record = (event: Parameters<typeof recordProgress>[1]) => {
     const before = isDailyComplete(normalizeProgress(progress));
     progress = recordProgress(progress, event);
@@ -180,7 +200,15 @@ export function mountCompanion(root: HTMLElement, options: CompanionOptions) {
   }
   update();
   return {
-    recordHit: (tool: ToolId) => record({ type: "hit", tool }),
+    recordHit: (tool: ToolId, context?: DiscoveryContext) => {
+      record({type:"hit",tool});
+      const discovery = context ? findDiscovery(tool, context) : undefined;
+      if (discovery && !progress.discoveries?.includes(discovery.id)) {
+        record({type:"discovery",id:discovery.id});
+        options.toast(`Vừa khám phá: ${discovery.name}. Đã ghi vào sổ của Bự.`);
+      }
+      return discovery;
+    },
     recordBreath: () => record({ type: "breath" }),
     progress: () => progress,
     openPostcard,

@@ -18,10 +18,11 @@ Chưa cấu hình backend vẫn chơi được trên máy. Copy `.env.example` s
 
 - 4 nhân vật, Cục bực có tạo hình riêng, 12 trang phục, 8 lựa chọn mũ và 5 lựa chọn kính, 3 dáng, 6 màu.
 - 12 đồ chơi với art, chuyển động, particles và âm thanh riêng. Phím 1–6 chọn sáu món đầu, Enter/Space dùng món đang chọn khi focus nhân vật.
-- 3 bối cảnh: phòng chill, vườn mưa, vũ trụ.
+- 5 bối cảnh: phòng chill, vườn mưa, vũ trụ, công sở và sân bóng. Công sở có giấy rung khi tác động, sân bóng có bóng nảy khi dùng cú đá.
 - Phiên chưa kết thúc giữ số lượt, biểu cảm và tối đa 18 dấu tác động gần nhất, cùng nhân vật và bối cảnh. Reload không xóa phiên. Nút kết thúc yêu cầu chọn rõ mở phiên mới.
 - Tủ đồ xem trước, bài thở 8 giây, gợi ý hằng ngày và bưu thiếp PNG. Link chia sẻ ngoại hình không chứa tên nhân vật và được giữ qua redirect Google. Bưu thiếp mặc định ẩn tên riêng.
-- Khi Google provider sẵn sàng, onboarding yêu cầu Google rồi tạo nickname và tên nhân vật. Đăng nhập lần đầu có thể nhập phiên trên máy. Khi provider chưa bật hoặc không tải được cấu hình, chơi local vẫn hoạt động.
+- Vào chơi ngay bằng guest. Google chỉ khi muốn đồng bộ hoặc thi đấu ranking. Tài khoản có sẵn vẫn được khôi phục, người đăng nhập chọn mang theo phiên guest hoặc giữ phiên tài khoản. SDK tài khoản tải sau khi cần, không nằm trên đường vào chơi lần đầu.
+- Animation tách đầu/thân/tay/tóc/miệng và nối tư thế khi chạm liên tiếp. Sổ của Bự có 6 phản ứng theo đồ chơi/bối cảnh, miễn phí và giữ qua ngày khác. Nghiên cứu và giả thuyết cần đo ở `docs/nhip-choi-va-do-luong.md`.
 - Bảng điểm đọc từ server. Thi đấu cần tài khoản, vòng 30 giây, giới hạn server 8 lượt/giây và sequence chống gửi lại. Đây không phải cơ chế ngăn mọi bot.
 - HTML hiện màn chờ ngay khi mở trang, trước khi app tải xong. Sau 8 giây chưa mở được có đường tải lại/hướng dẫn. Không có bộ đếm phần trăm giả, tôn trọng reduced motion.
 
@@ -49,7 +50,9 @@ Quảng cáo và bán cosmetics là hướng kiếm tiền đã chọn, hiện c
 
 ## Bằng chứng kiểm tra
 
-Ngày 21/10/2026, 42 tests qua trên 10 files, gồm thực thi migration bằng PostgreSQL WASM, RLS giữa hai tài khoản, từ chối ghi điểm/entitlement trực tiếp, revision conflict và vòng thi đấu server. Browser bản build: 144 tổ hợp 4 nhân vật × 12 đồ chơi × 3 bối cảnh ghi đúng 144 lượt, không console error. Reload giữ 144 lượt, hoodie, mũ len, kính tròn và dấu pháo giấy. Chọn chơi tiếp giữ phiên, mở phiên mới đưa về 0 và xóa dấu, vẫn giữ trang phục. PNG bưu thiếp đã tải được. Đã xem lại bằng khung trình duyệt 320px và 375px, sửa thanh đồ chơi xếp dọc che sân chơi thành hàng ngang có vuốt.
+Ngày 21/10/2026, 52 tests qua trên 14 files, gồm thực thi migration bằng PostgreSQL WASM, RLS giữa hai tài khoản, từ chối ghi điểm/entitlement trực tiếp, revision conflict và vòng thi đấu server. Browser bản build: 144 tổ hợp 4 nhân vật × 12 đồ chơi × 3 bối cảnh ghi đúng 144 lượt, không console error. Reload giữ 144 lượt, hoodie, mũ len, kính tròn và dấu pháo giấy. Chọn chơi tiếp giữ phiên, mở phiên mới đưa về 0 và xóa dấu, vẫn giữ trang phục. PNG bưu thiếp đã tải được. Đã xem lại bằng khung trình duyệt 320px và 375px, sửa thanh đồ chơi xếp dọc che sân chơi thành hàng ngang có vuốt.
+
+Bản nâng cấp còn được kiểm tra 96 tổ hợp 4 nhân vật × 12 đồ chơi × 2 bối cảnh mới. Guest tải lại giữ 107 lượt, scene Sân bóng và dấu tác động. Sáu phản ứng trong Sổ của Bự đã được thử qua UI, reload giữ 6/6. Guest xem được bảng thật. Luồng guest → Google → chọn phiên tài khoản đã chạy thật trên preview 127.0.0.1 được allowlist, không tự nhập phiên guest.
 
 Google OAuth production của chủ dự án đã qua vòng login, sync, reload và logout/login. Vòng QA 30 giây ghi nhận 3 lượt trên bảng tổng/7 ngày. Reload ngay sau cú đấm giữ đúng phiên 8 lượt và 8 dấu tác động, sau đó đồng bộ lên server. Chi tiết ở `docs/kiem-chung-2026-10-21.md`.
 

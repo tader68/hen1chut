@@ -793,7 +793,7 @@ select {
   position: absolute;
   width: 60px;
   height: 60px;
-  border: 4px solid #fff7ce;
+  border: 2.5px solid #fff7ce;
   border-radius: 50%;
   pointer-events: none;
   animation: ring 0.45s ease-out forwards;
@@ -3220,3 +3220,53 @@ dialog button {
     align-items: stretch;
   }
 }
+
+/* The hero is a puppet: the head and soft limbs follow the impact separately. */
+#figure .pose-head,
+#figure .pose-body,
+#figure .pose-arm-left,
+#figure .pose-arm-right,
+#figure .pose-tuft,
+#figure .pose-mouth {
+  transform-box: view-box;
+}
+#figure .pose-head { transform-origin: 150px 196px; }
+#figure .pose-body { transform-origin: 150px 278px; }
+#figure .pose-arm-left { transform-origin: 98px 234px; }
+#figure .pose-arm-right { transform-origin: 201px 233px; }
+#figure .pose-tuft { transform-origin: 150px 82px; }
+#figure .pose-mouth { transform-origin: 150px 166px; }
+#figure .pose-gaze {
+  transform: translate(var(--look-x, 0px), var(--look-y, 0px));
+  transition: transform 140ms ease-out;
+}
+.discovery-book { grid-column: 1 / -1; width: 100%; border-top: 1px solid var(--line); padding-top: 14px; }
+#discovery-toggle { justify-content: space-between; width: 100%; min-height: 44px; padding: 6px 0; font-size: 14px; font-weight: 650; }
+#discovery-count { color: #6c5f77; font-size: 12px; font-weight: 400; }
+#discovery-list { list-style: none; padding: 0; margin: 14px 0 0; }
+#discovery-list li { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.discovery-art { display: block; width: 42px; height: 42px; flex: 0 0 42px; opacity: .55; }
+.discovery-art svg { width: 100%; height: 100%; }
+.discovered .discovery-art { opacity: 1; }
+#discovery-list b { font-size: 13px; font-weight: 650; }
+#discovery-list p { color: #6c5f77; font-size: 12px; line-height: 1.7; margin: 4px 0 0; }
+.discovery-state { margin-left: auto; font-size: 11px; white-space: nowrap; color: #6c5f77; }
+.discovered .discovery-state { color: #416d57; }
+@media (max-width:560px) { #discovery-list li { gap: 10px; } .discovery-state { font-size: 10px; } }
+.scene-tabs { min-width: 0; max-width: 100%; overflow-x: auto; scrollbar-width: thin; }
+.scene-tabs button { flex-shrink: 0; min-height: 38px; }
+.stage-top > .icon-button { flex-shrink: 0; }
+.office-clouds { animation: office-cloud-drift 12s ease-in-out infinite alternate; }
+.office-steam { animation: office-coffee-steam 3.6s ease-in-out infinite; }
+.pitch-flag { transform-box: fill-box; transform-origin: left center; animation: pitch-breeze 3.8s ease-in-out infinite; }
+@keyframes office-cloud-drift { to { transform: translateX(12px); } }
+@keyframes office-coffee-steam { 0%,100% { opacity: .3; transform: translateY(0); } 50% { opacity: .7; transform: translateY(-5px); } }
+@keyframes pitch-breeze { 0%,100% { transform: skewY(-4deg) scaleX(.95); } 50% { transform: skewY(4deg) scaleX(1); } }
+@media (max-width:560px) {
+  .office-workstation { transform: translate(230px,397px); }
+  .office-clock { transform: translate(602px,152px); }
+  .office-chair { transform: translate(655px,414px); }
+}
+
+.guest-label-short { display: none; }
+@media (max-width: 420px) { .guest-label-full { display: none; } .guest-label-short { display: inline; } }

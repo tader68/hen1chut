@@ -24,6 +24,7 @@ describe("daily progress", () => {
       day,
     );
     expect(value).toEqual({
+      discoveries: [],
       day,
       hits: 0,
       tools: ["hammer"],
