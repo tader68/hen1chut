@@ -100,6 +100,7 @@ export class Cloud {
       provider: "google",
       options: {
         redirectTo: redirect.toString(),
+        scopes: "openid email profile",
         queryParams: { prompt: "select_account" },
       },
     });

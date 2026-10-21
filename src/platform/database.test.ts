@@ -35,6 +35,7 @@ beforeAll(async () => {
   for (const file of [
     "202610210001_core.sql",
     "202610210002_state_revision.sql",
+    "20261021021454_isolate_privileged_rpcs.sql",
   ])
     await db.exec(
       await readFile(
@@ -52,6 +53,27 @@ afterAll(async () => {
   await db.close();
 });
 describe("database privacy and profiles", () => {
+  it("keeps all public entry points invoker-only and denies anonymous writes", async () => {
+    const publicFns = await db.query<{ name: string; definer: boolean }>(
+      "select p.proname as name,p.prosecdef as definer from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'",
+    );
+    expect(publicFns.rows).toHaveLength(6);
+    expect(publicFns.rows.every((f) => f.definer === false)).toBe(true);
+    await db.exec("set role anon");
+    try {
+      await expect(
+        db.query("select public.upsert_profile('Guest')"),
+      ).rejects.toThrow("permission denied");
+      await expect(
+        db.query("select hen1chut_private.upsert_profile('Guest')"),
+      ).rejects.toThrow("permission denied");
+      expect(
+        (await db.query("select * from public.get_leaderboard()")).rows,
+      ).toEqual([]);
+    } finally {
+      await db.exec("reset role");
+    }
+  });
   it("rejects null or negative revisions without changing stored state", async () => {
     await profile(A, "One");
     for (const revision of [null, -1])

@@ -2,8 +2,10 @@ import "./style.css";
 import { mountStage } from "./stage/stage";
 import { onboard } from "./ui/onboarding";
 import { cloudConfig, cloudConfigured } from "./platform/config";
+import { rememberPreset, recoverPreset } from "./sharing/preset";
 const root = document.getElementById("app")!;
 async function start(): Promise<void> {
+  rememberPreset(location.href);
   let cloud;
   if (cloudConfigured) {
     const { Cloud } = await import("./platform/cloud");
@@ -14,6 +16,8 @@ async function start(): Promise<void> {
     cloud,
     cloud ? await cloud.googleAvailable() : false,
   );
+  const resumed = recoverPreset(location.href);
+  if (resumed !== location.href) history.replaceState(null, "", resumed);
   mountStage(root, account);
   window.scrollTo(0, 0);
 }

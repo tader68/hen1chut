@@ -4,9 +4,9 @@ Database online đã tạo ngày 21/10/2026 trên organization cá nhân hiện 
 
 - Project: `hen1chut`, ref `kxzwotzmxlulmwhwljwt`, Singapore.
 - Project URL: `https://kxzwotzmxlulmwhwljwt.supabase.co`.
-- Hai migration `202610210001_core.sql` và `202610210002_state_revision.sql` đã áp dụng thành công, không chạy lại trên database này.
+- Ba migration `202610210001_core.sql`, `202610210002_state_revision.sql` và `20261021021454_isolate_privileged_rpcs.sql` đã áp dụng thành công, không chạy lại trên database này.
 - API bảng điểm đã phản hồi HTTP 200 với bảng trống, sáu bảng đều có RLS.
-- Google Cloud project cá nhân: `glossy-box-512221-q9`, tên `hen1chut`. Branding OAuth và web client `hen1chut Supabase login` đã tạo. Google provider đã bật trong Supabase, Site URL và 3 redirect URL đã lưu. Google audience vẫn ở Testing, đăng nhập thật còn chờ kiểm chứng.
+- Google Cloud project cá nhân: `glossy-box-512221-q9`, tên `hen1chut`. Branding OAuth và web client `hen1chut Supabase login` đã tạo. Google provider đã bật trong Supabase, Site URL và 3 redirect URL đã lưu. Google audience đã chuyển sang Production theo xác nhận của chủ tài khoản, đăng nhập thật còn chờ chủ tài khoản hoàn tất consent.
 
 Các bước tạo database dưới đây dành cho môi trường mới. Không dùng tài khoản Google Cloud của công ty cho project cá nhân này.
 
@@ -14,7 +14,7 @@ Các bước tạo database dưới đây dành cho môi trường mới. Không
 
 1. Vào https://supabase.com/dashboard, đăng nhập tài khoản cá nhân.
 2. Tạo organization gói **Free**, rồi tạo project `hen1chut`. Chọn Singapore nếu có. Giữ database password trong password manager, không gửi trong chat hoặc commit.
-3. Trong SQL Editor, chạy lần lượt hai migration trong `supabase/migrations/` một lần trên project mới. Không chạy lại migration lên project đã có bảng cùng tên.
+3. Trong SQL Editor, chạy lần lượt ba migration trong `supabase/migrations/` một lần trên project mới. Không chạy lại migration lên project đã có bảng cùng tên.
 4. Vào Settings → API hoặc Connect, lấy Project URL và **publishable key**. Legacy `anon` key cũng được hỗ trợ. Không dùng `service_role` hoặc `sb_secret_...` trong frontend.
 
 Gói Free có hạn mức và có thể tạm dừng khi không hoạt động. Không thêm billing hay nâng cấp gói khi chưa được chủ tài khoản yêu cầu. Theo dõi dung lượng trong console, không tạo cron giả để né chính sách tạm dừng.
@@ -53,3 +53,9 @@ Tests PostgreSQL local có thể chứng minh logic SQL và RLS. Chúng không t
 Điểm tự do của nhân vật không được client đưa lên bảng. Vòng xếp hạng dài 30 giây do server ấn định, nhận tối đa 8 lượt trong mỗi giây server, sequence chống nhận lặp, kết quả chỉ được công bố khi vòng khép lại. Server giới hạn số vòng theo giờ và dọn round cũ theo tài khoản.
 
 Cơ chế này ngăn tự ghi điểm, replay và sửa thời gian trên client. Nó không chứng minh người chơi là người thật và không ngăn được hoàn toàn bot/auto-click. Nếu có lạm dụng thực tế, bổ sung challenge/rate limit ở API trước khi mở thưởng có giá trị tiền.
+
+## 6. Ranh giới quyền database
+
+Ba migration đã chạy online. Các public RPC là `SECURITY INVOKER`, chuyển tiếp tới implementation trong schema `hen1chut_private` không được Data API expose. Các hàm ghi bên trong vẫn kiểm tra `auth.uid()` và chỉ có role `authenticated` được gọi. Hàm bảng điểm là đường đọc công khai có giới hạn số kết quả và loại bỏ dữ liệu riêng. Các bảng tiếp tục bật RLS và không cấp ghi trực tiếp cho client.
+
+Kiểm tra sau migration: `get_leaderboard` trả HTTP 200, gọi schema nội bộ qua REST bị từ chối HTTP 406, `upsert_profile` khi chưa đăng nhập bị từ chối HTTP 401. Advisor không còn WARN về `SECURITY DEFINER` công khai. Hai INFO [RLS enabled no policy](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy) ở bảng điểm được giữ có chủ ý: direct access bị từ chối, chỉ đọc kết quả công khai qua RPC. Không thêm policy đọc toàn bảng để làm biến mất INFO.

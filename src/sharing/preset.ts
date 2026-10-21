@@ -47,3 +47,30 @@ export function parsePreset(hash: string): SharedPreset | null {
     return null;
   }
 }
+
+const PENDING_PRESET = "hen1chut.pending-preset";
+// Keep a sanitized invitation in this tab while Google redirects away from the site.
+export function rememberPreset(url: string): void {
+  try {
+    const current = new URL(url),
+      preset = parsePreset(current.hash);
+    if (preset)
+      sessionStorage.setItem(
+        PENDING_PRESET,
+        new URL(presetUrl(preset.character, preset.scene, url)).hash,
+      );
+  } catch {
+    /* Sharing stays optional when storage is blocked. */
+  }
+}
+export function recoverPreset(url: string): string {
+  try {
+    const pending = sessionStorage.getItem(PENDING_PRESET);
+    sessionStorage.removeItem(PENDING_PRESET);
+    if (parsePreset(new URL(url).hash)) return url;
+    const preset = parsePreset(pending || "");
+    return preset ? presetUrl(preset.character, preset.scene, url) : url;
+  } catch {
+    return url;
+  }
+}
