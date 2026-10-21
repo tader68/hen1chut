@@ -1,6 +1,6 @@
 # Hẹn 1 chút
 
-Game hoạt hình tiếng Việt tại https://tader68.github.io/hen1chut/. Vite + TypeScript, SVG nhân vật, Canvas particles và Web Audio. Supabase Free cung cấp tài khoản, đồng bộ riêng tư và bảng xếp hạng.
+Game hoạt hình tiếng Việt tại https://tader68.github.io/hen1chut/. Vite + TypeScript, nhân vật Three.js 3D với SVG fallback, Canvas particles và Web Audio. Supabase Free cung cấp tài khoản, đồng bộ riêng tư và bảng xếp hạng.
 
 ## Chạy và kiểm tra
 
@@ -17,6 +17,8 @@ Chưa cấu hình backend vẫn chơi được trên máy. Copy `.env.example` s
 ## Trải nghiệm hiện có
 
 - 4 nhân vật, Cục bực có tạo hình riêng, 12 trang phục, 8 lựa chọn mũ và 5 lựa chọn kính, 3 dáng, 6 màu.
+- Cả 4 loại có model 3D trên màn chơi chính. Sáu mẫu chọn nhanh: Sếp, Chị Biz, Bạn Sales, Đồng nghiệp, Mèo ú và Bự. Bốn mẫu công sở là tổ hợp từ các loại người, trang phục và phụ kiện miễn phí, vẫn sửa được tên/ngoại hình. Không gọi chúng là sáu bộ model độc lập.
+- Cả 12 trang phục miễn phí, mũ, kính, dáng và 12 đồ chơi có hình khối 3D. Tủ đồ, chân dung và bưu thiếp dùng tạo hình 3D khi WebGL hoạt động. Khi tải 3D lỗi/mất context vẫn chơi bằng SVG, có nút chuyển bản nhẹ. `?atelier` chỉ là phòng thử thêm, không phải nơi duy nhất có đồ họa mới.
 - 12 đồ chơi với art, chuyển động, particles và âm thanh riêng. Phím 1–6 chọn sáu món đầu, Enter/Space dùng món đang chọn khi focus nhân vật.
 - 5 bối cảnh: phòng chill, vườn mưa, vũ trụ, công sở và sân bóng. Công sở có giấy rung khi tác động, sân bóng có bóng nảy khi dùng cú đá.
 - Phiên chưa kết thúc giữ số lượt, biểu cảm và tối đa 18 dấu tác động gần nhất, cùng nhân vật và bối cảnh. Reload không xóa phiên. Nút kết thúc yêu cầu chọn rõ mở phiên mới.
@@ -42,11 +44,13 @@ Script so sánh cmap, glyph coordinates và metric trước/sau. Font đầu ra 
 
 ## Database và public
 
-Project Supabase `hen1chut` đã tạo trong organization cá nhân hiện có, vùng Singapore, gói Free. Ba migration trong `supabase/migrations/` đã áp dụng online. Sáu bảng đều bật RLS, dữ liệu riêng chỉ tài khoản sở hữu đọc được. Bảng công khai chỉ trả nickname, ngoại hình và điểm qua RPC giới hạn kết quả.
+Project Supabase `hen1chut` đã tạo trong organization cá nhân hiện có, vùng Singapore, gói Free. Bốn migration trong `supabase/migrations/` đã áp dụng online, gồm phần chuẩn bị commerce đang đóng. Các bảng đều bật RLS, dữ liệu riêng chỉ tài khoản sở hữu đọc được. Bảng điểm chỉ trả nickname, ngoại hình và điểm qua RPC giới hạn kết quả.
 
 Xem `docs/ket-noi-supabase-free.md` để nối Google OAuth và cấu hình build. Workflow `.github/workflows/deploy.yml` test, build và deploy GitHub Pages khi push `main`. Hai Actions Variables là `VITE_SUPABASE_URL` và `VITE_SUPABASE_PUBLISHABLE_KEY`, đều là cấu hình public.
 
 Quảng cáo và bán cosmetics là hướng kiếm tiền đã chọn, hiện chưa có quảng cáo/checkout hoạt động. Không dùng điểm hoặc unlock giả để mô phỏng thanh toán thành công. Bảng `entitlements` chỉ cho tài khoản đọc quyền của mình, frontend không được tự cấp.
+
+Chủ dự án đã chốt 10.000đ/cả hai bộ Rồng con + Giáp máy, duyệt chuyển khoản thủ công trước. Mẫu trang phục có thể xem 3D trong tủ, chưa mở bán. Backend catalog cũ 29.000đ vẫn hidden/inactive, không phải giá được duyệt để bán. Luồng manual nằm trong `docs/drafts/`, chưa áp dụng, chưa có ngân hàng hoặc quyền operator. Hai Edge Functions chuẩn bị checkout/webhook fail closed khi chưa cấu hình, không được xem đó là thanh toán live.
 
 ## Bằng chứng kiểm tra
 
@@ -57,3 +61,5 @@ Bản nâng cấp còn được kiểm tra 96 tổ hợp 4 nhân vật × 12 đ�
 Google OAuth production của chủ dự án đã qua vòng login, sync, reload và logout/login. Vòng QA 30 giây ghi nhận 3 lượt trên bảng tổng/7 ngày. Reload ngay sau cú đấm giữ đúng phiên 8 lượt và 8 dấu tác động, sau đó đồng bộ lên server. Chi tiết ở `docs/kiem-chung-2026-10-21.md`.
 
 Đồng bộ hai thiết bị/tài khoản thật, thanh toán/quảng cáo live, Lighthouse/FPS và thiết bị iOS/Android thật vẫn cần kiểm chứng riêng. Tests local không thay thế các bằng chứng này. Bản code mới chỉ là bản public sau khi workflow deploy của commit tương ứng thành công.
+
+Nghiên cứu tạo hình và giới hạn áp dụng nằm ở [sức hút nhân vật](docs/suc-hut-nhan-vat.md). Không có dữ liệu nào hiện chứng minh các mẫu mới sẽ nổi tiếng hoặc bán được như một IP lớn. Three.js 0.186.1 được khóa phiên bản, thông báo MIT đi kèm tại `public/three-LICENSE.txt`.

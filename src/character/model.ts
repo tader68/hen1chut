@@ -1,5 +1,5 @@
 export const kinds = ["buddy", "girl", "cat", "blob"] as const;
-export const outfits = [
+export const freeOutfits = [
   "basic",
   "stripes",
   "overalls",
@@ -13,6 +13,8 @@ export const outfits = [
   "denim",
   "kimono",
 ] as const;
+export const premiumOutfits = ["dragon", "mecha"] as const;
+export const outfits = [...freeOutfits, ...premiumOutfits] as const;
 export const hats = [
   "none",
   "beanie",
@@ -37,6 +39,8 @@ export const outfitLabels: Record<(typeof outfits)[number], string> = {
   bomber: "Bomber bụi bặm",
   denim: "Áo denim",
   kimono: "Áo khoác hoa",
+  dragon: "Rồng con",
+  mecha: "Giáp máy",
 };
 export const hatLabels: Record<(typeof hats)[number], string> = {
   none: "Đầu trần",

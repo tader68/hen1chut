@@ -16,6 +16,8 @@ export function outfitLayer(
     bomber: "#9b9e81",
     denim: "#85a6bf",
     kimono: "#d39eab",
+    dragon: "#7aaf9e",
+    mecha: "#879db5",
   }[outfit];
   const base = `<path d="M90 185q-22 58 1 84 21 23 59 20 44 2 65-22 22-29-6-82Z" fill="${fill}"/>`;
   const details: Record<Character["outfit"], string> = {
@@ -42,8 +44,17 @@ export function outfitLayer(
       '<path d="M150 215v68m-22-77-14 26 20 7 16-19 16 19 19-7-12-26" fill="none" stroke="#c2d4dc" stroke-width="3"/><path d="M109 241h25v18l-12 6-13-6Zm57 0h25v18l-13 6-12-6Z" fill="#6b91ae"/><g fill="#e4d2aa"><circle cx="150" cy="244" r="2.5"/><circle cx="150" cy="263" r="2.5"/></g>',
     kimono:
       '<path d="m123 208 57 72m-4-72-47 62" stroke="#f3d8dc" stroke-width="10"/><path d="M90 255h121v17H91Z" fill="#817c9e"/><g fill="#f3d9b4" stroke="none"><circle cx="110" cy="231" r="5"/><circle cx="188" cy="244" r="4"/><circle cx="128" cy="278" r="4"/></g>',
+    dragon:
+      '<path d="M131 215q-20 36-10 61 29 15 58 0 10-27-10-61Z" fill="#e9d9a1"/><path d="M127 237h47m-49 14h51m-49 14h46" stroke="#c2b57f" stroke-width="2" fill="none"/><path d="M91 222q-39-44-57-13l18 16-6 23 29-2 19 16m117-40q39-44 57-13l-18 16 6 23-29-2-19 16" fill="#d39eaa"/><path d="m40 211 35 18 16 25m169-43-35 18-16 25" stroke="#ae7e94" stroke-width="2" fill="none"/><path d="M194 275q59 40 60-5-13 18-35-5" fill="#7aaf9e"/><path d="m226 281 7-13 8 7m-22 1 4-15 9 7" fill="#ead69a"/><path d="M111 288q-15 7-18 16 16 5 34-5m46 0q18 10 34 5-3-9-18-16" fill="#e9d9a1"/>',
+    mecha:
+      '<path d="m96 207 24-11 30 24 30-24 24 11 9 51-26 27h-74l-27-27Z" fill="#99aec2"/><path d="m111 215 39 21 39-21-9 45h-60Z" fill="#566c86"/><path d="m150 230 15 13-15 17-15-17Z" fill="#a9e1d2" stroke="#d2eee2" stroke-width="3"/><path d="m120 269 30 9 30-9m-30-6v15" fill="none" stroke="#d7dfdf" stroke-width="3"/><path d="m72 222 24-11 12 21-28 19-16-9Zm156 0-24-11-12 21 28 19 16-9Z" fill="#c8b5d5"/><path d="m78 230 15-8m129 8-15-8" stroke="#eee4e9" stroke-width="3"/><path d="M96 286h31v18H92Zm77 0h31l4 18h-35Z" fill="#61788f"/><path d="M98 295h18m67 0h18" stroke="#9cddce" stroke-width="3"/>',
   };
   return base + details[outfit];
+}
+export function costumeHeadLayer(outfit: Character["outfit"]): string {
+  if (outfit === "dragon") return '<path d="M71 149V99q0-46 79-46t79 46v50l-10 31-10-10V99q-15-30-59-28-45-2-59 28v71l-10 10Z" fill="#7aaf9e"/><path d="m88 82-8-35q25-3 31 24m78 0q6-27 31-24l-8 35" fill="#eeddb0"/><path d="m130 59 8-19 12 16 12-16 8 19" fill="#d4a0ab"/><path d="m75 123-13 11 16 11m147-22 13 11-16 11" fill="#e9d9a1"/>';
+  if (outfit === "mecha") return '<path d="M67 142V94q0-47 83-47t83 47v48l-14 15V97q-15-30-69-29-54-1-69 29v60Z" fill="#849ab3"/><path d="m84 83 19-22h94l19 22-29-9h-74Z" fill="#d4c3dc"/><path d="M61 116h22v48H61Zm156 0h22v48h-22Z" fill="#5c728d"/><path d="M70 126v22m160-22v22m-82-91v12" stroke="#a9e1d2" stroke-width="5" stroke-linecap="round"/>';
+  return "";
 }
 export function hatLayer(hat: Character["hat"]): string {
   return {

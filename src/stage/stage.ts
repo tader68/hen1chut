@@ -9,6 +9,8 @@ import {
 import { loadPreferences, savePreferences } from "../platform/preferences";
 import { mountCompanion } from "../ui/companion";
 import { mountCloset } from "../ui/closet";
+import { mountShop } from "../ui/shop";
+import { accessibleCharacter, wearableOutfits } from "../commerce/catalog";
 import { mountRanking } from "../ui/ranking";
 import type { AccountContext } from "../ui/onboarding";
 import type { PlayerState } from "../platform/cloud";
@@ -22,7 +24,6 @@ import {
   escapeHtml,
   kinds,
   colors,
-  outfits,
   hats,
   glasses,
   outfitLabels,
@@ -36,6 +37,7 @@ import { animatePuppet, capturePuppetPose } from "../fx/puppet";
 import { tools, toolArt, type ToolId } from "../tools/registry";
 import { scenes, sceneArt, type SceneId } from "../env/scenes";
 import { Sound } from "../audio/synth";
+import { characterPresets } from "../character/presets";
 const icon = (name: string) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${({ sound: '<path d="m11 5-6 4H2v6h3l6 4Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>', mute: '<path d="m11 5-6 4H2v6h3l6 4Zm6 4 5 6m0-6-5 6"/>', reset: '<path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/>', arrow: '<path d="M5 12h14m-5-5 5 5-5 5"/>', shuffle: '<path d="m4 5 16 14m-4 0h4v-4M4 19l5-5m6-4 5-5m-4 0h4v4"/>', heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>', share: '<path d="M12 16V3m-5 5 5-5 5 5M5 13v7h14v-7"/>' } as Record<string, string>)[name] || ""}</svg>`;
 const kindLabels = ["Cậu bạn", "Cô bạn", "Mèo ú", "Cục bực"];
@@ -43,6 +45,9 @@ export function mountStage(
   root: HTMLElement,
   account: AccountContext = { nickname: "Bạn chill" },
 ): void {
+  const owned = new Set(account.owned || []);
+  let availableOutfits = wearableOutfits(owned);
+  let initializing = true;
   const prefix = account.userId
     ? `hen1chut.account.${account.userId}`
     : "hen1chut";
@@ -59,10 +64,8 @@ export function mountStage(
   const preferences =
     account.initial?.preferences || loadPreferences(preferencesKey);
   let session = account.initial?.session || loadSession(sessionKey);
-  let character =
-      account.initial?.character ||
-      account.character ||
-      loadCharacter(characterKey),
+  let character = accessibleCharacter(
+      account.initial?.character || account.character || loadCharacter(characterKey), owned),
     state = { hits: session.hits, mood: session.mood },
     selected: ToolId = preferences.tool,
     scene: SceneId = preferences.scene,
@@ -83,7 +86,7 @@ export function mountStage(
           <div class="arena" id="arena" data-scene="studio"><div class="scenery" id="scenery">${sceneArt("studio")}</div><div class="stage-caption"><span class="live-dot"></span><span id="scene-description">${scenes[0].description}</span></div><div class="speech" id="speech">Hôm nay có gì bực à?</div><div class="figure-ground"></div><div class="character-position"><button id="figure" class="figure-wrap" type="button" aria-label="Chạm để dùng búa mềm"></button></div><div class="impact-tool" id="impact-tool" aria-hidden="true"></div><canvas id="fx" aria-hidden="true"></canvas><div class="combo" id="combo" aria-hidden="true"></div><div class="stage-instruction" id="instruction"><span class="tap-symbol">${icon("arrow")}</span> Chạm vào mình để xả bực</div><div class="character-tag"><span id="character-name"></span><span>Đồng đội hứng bực của bạn</span></div></div>
           <div class="stage-bottom"><div class="score"><span class="score-icon">${icon("heart")}</span><div><strong><span id="count">0</span> <small>lần xả bực</small></strong><span id="milestone">Cứ từ từ, ở đây không ai vội.</span></div></div><button class="breathe-button" id="breathe">Thở một chút ${icon("arrow")}</button></div>
         </section>
-        <aside class="creator-panel"><div class="panel-heading"><h2>Bạn đồng hành</h2><button type="button" id="closet-open" class="closet-launcher">Tủ đồ ↗</button><button type="button" id="shuffle" class="icon-button" aria-label="Tạo nhân vật ngẫu nhiên">${icon("shuffle")}</button></div><p class="panel-subtitle">Tạo một gương mặt để gửi bực bội.</p><div class="kind-options" role="group" aria-label="Loại nhân vật">${kinds.map((k, i) => `<button type="button" data-kind="${k}" aria-pressed="${k === character.kind}"><span>${renderFigure({ ...character, kind: k }, "normal", `thumb-${k}`)}</span>${kindLabels[i]}</button>`).join("")}</div><label class="field-label" for="name">Gọi bạn ấy là</label><div class="name-field"><input id="name" maxlength="40" value="${escapeHtml(character.name)}" autocomplete="off"/><span id="name-length"></span></div><span class="field-label" id="colors-label">Một chút màu sắc</span><div class="colors" role="group" aria-labelledby="colors-label">${colors.map((c, i) => `<button type="button" style="--swatch:${c}" data-color="${c}" aria-label="${["Tím khoai", "Cam đào", "Xanh bạc hà", "Vàng mật", "Xanh trời", "Hồng kẹo"][i]}" aria-pressed="${c === character.color}"><span></span></button>`).join("")}</div><label class="field-label" for="outfit">Mặc gì hôm nay?</label><select id="outfit">${outfits.map((o) => `<option value="${o}">${outfitLabels[o]}</option>`).join("")}</select><label class="field-label" for="body">Dáng người</label><select id="body"><option value="regular">Vừa xinh</option><option value="round">Tròn ủm</option><option value="tall">Cao nhòng</option></select><div class="extra-customization"><label class="field-label" for="hat">Mũ & phụ kiện đầu</label><select id="hat">${hats.map((h) => `<option value="${h}">${hatLabels[h]}</option>`).join("")}</select><label class="field-label" for="glasses">Kính & biểu cảm</label><select id="glasses">${glasses.map((g) => `<option value="${g}">${glassesLabels[g]}</option>`).join("")}</select></div><p class="saved-note" id="saved-note">${account.cloud ? "Phiên lưu riêng trong tài khoản. Ngoại hình có thể hiện trên bảng điểm." : "Lưu trên máy bạn, riêng tư thôi."}</p><div class="little-note"><span aria-hidden="true">“</span><p>Không cần lúc nào<br/>cũng phải ổn.<br/><b>Nghỉ một chút cũng được.</b></p></div></aside>
+        <aside class="creator-panel"><div class="panel-heading"><h2>Bạn đồng hành</h2><button type="button" id="closet-open" class="closet-launcher">Tủ đồ ↗</button><button type="button" id="shuffle" class="icon-button" aria-label="Tạo nhân vật ngẫu nhiên">${icon("shuffle")}</button></div><p class="panel-subtitle">Tạo một gương mặt để gửi bực bội.</p><div class="kind-options" role="group" aria-label="Loại nhân vật">${kinds.map((k, i) => `<button type="button" data-kind="${k}" aria-pressed="${k === character.kind}"><span>${renderFigure({ ...character, kind: k }, "normal", `thumb-${k}`)}</span>${kindLabels[i]}</button>`).join("")}</div><label class="field-label" for="name">Gọi bạn ấy là</label><div class="name-field"><input id="name" maxlength="40" value="${escapeHtml(character.name)}" autocomplete="off"/><span id="name-length"></span></div><span class="field-label" id="colors-label">Một chút màu sắc</span><div class="colors" role="group" aria-labelledby="colors-label">${colors.map((c, i) => `<button type="button" style="--swatch:${c}" data-color="${c}" aria-label="${["Tím khoai", "Cam đào", "Xanh bạc hà", "Vàng mật", "Xanh trời", "Hồng kẹo"][i]}" aria-pressed="${c === character.color}"><span></span></button>`).join("")}</div><label class="field-label" for="outfit">Mặc gì hôm nay?</label><select id="outfit">${availableOutfits.map((o) => `<option value="${o}">${outfitLabels[o]}</option>`).join("")}</select><label class="field-label" for="body">Dáng người</label><select id="body"><option value="regular">Vừa xinh</option><option value="round">Tròn ủm</option><option value="tall">Cao nhòng</option></select><div class="extra-customization"><label class="field-label" for="hat">Mũ & phụ kiện đầu</label><select id="hat">${hats.map((h) => `<option value="${h}">${hatLabels[h]}</option>`).join("")}</select><label class="field-label" for="glasses">Kính & biểu cảm</label><select id="glasses">${glasses.map((g) => `<option value="${g}">${glassesLabels[g]}</option>`).join("")}</select></div><p class="saved-note" id="saved-note">${account.cloud ? "Phiên lưu riêng trong tài khoản. Ngoại hình có thể hiện trên bảng điểm." : "Lưu trên máy bạn, riêng tư thôi."}</p><div class="little-note"><span aria-hidden="true">“</span><p>Không cần lúc nào<br/>cũng phải ổn.<br/><b>Nghỉ một chút cũng được.</b></p></div></aside>
       </div>
       <footer class="footer"><p>Chỉ là hoạt hình. Chỉ để nhẹ lòng.</p><span><a href="./huong-dan.html">Cách chơi</a> · <a href="./quyen-rieng-tu.html">Quyền riêng tư</a> · <a href="./ve-hen1chut.html">Về Hẹn 1 chút</a> · <a href="./dieu-khoan.html">Điều khoản</a></span><p>Hẹn bạn một ngày dịu hơn.</p></footer>
     </main>
@@ -97,6 +100,17 @@ export function mountStage(
   const particles = new Particles(canvas),
     audio = new Sound(),
     reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  let sculpted: ReturnType<(typeof import("../character/renderer3d"))["createToyStage"]> | undefined;
+  let previousAppearance = "";
+  const creator = root.querySelector(".creator-panel")!;
+  const presets = document.createElement("section");
+  presets.className = "character-presets";
+  presets.innerHTML = `<h3>Chọn mẫu rồi tự chỉnh</h3><div class="role-presets">${characterPresets.map(p => `<button type="button" data-role-preset="${p.id}" title="${p.note}"><span class="role-portrait">${renderFigure(p.character, "normal", `role-${p.id}`)}</span><span>${p.label}</span></button>`).join("")}</div><p class="field-help">Sếp, bạn cùng team hay ai đó bạn tự nghĩ ra. Đổi tên và phối đồ theo ý bạn.</p>`;
+  creator.querySelector(".panel-subtitle")!.after(presets);
+  const shortcuts = document.createElement("div"); shortcuts.className = "role-shortcuts"; shortcuts.setAttribute("role", "group"); shortcuts.setAttribute("aria-label", "Chọn nhanh nhân vật");
+  shortcuts.innerHTML = `<span>Thử nhanh</span>${characterPresets.map(p => `<button type="button" data-role-preset="${p.id}" aria-pressed="false">${p.label}</button>`).join("")}`;
+  root.querySelector(".stage-top")!.before(shortcuts);
+  const renderControl = document.createElement("button"); renderControl.className = "quiet-button render-mode"; renderControl.id = "render-mode"; renderControl.textContent = "Đang chuẩn bị nhân vật 3D…"; renderControl.disabled = true; creator.append(renderControl);
   let recovery: ReturnType<typeof setTimeout>,
     lastHit = 0,
     combo = 0,
@@ -119,6 +133,11 @@ export function mountStage(
   };
   const draw = () => {
     figure.innerHTML = renderFigure(character, mood, "hero", session.marks);
+    if (sculpted) {
+      const appearance = JSON.stringify(character);
+      if (appearance !== previousAppearance) { sculpted.character(character); previousAppearance = appearance; }
+      sculpted.session(mood, session.marks);
+    }
     figure.setAttribute(
       "aria-label",
       `Dùng ${tools.find((t) => t.id === selected)!.label} lên ${character.name}`,
@@ -128,10 +147,19 @@ export function mountStage(
     $("#name-length").textContent = `${Array.from(character.name).length}/20`;
   };
   const persist = () => {
-    character = normalizeCharacter(character);
+    character = accessibleCharacter(normalizeCharacter(character), owned);
     draw();
+    if (sculpted) root.querySelectorAll<HTMLElement>("[data-kind]").forEach(button => {
+      const image = sculpted?.portrait({ ...character, kind: button.dataset.kind as Character["kind"] });
+      if (image) button.querySelector("span")!.innerHTML = `<img src="${image}" alt=""/>`;
+    });
     saveSnapshot();
   };
+  root.querySelectorAll<HTMLButtonElement>("[data-role-preset]").forEach(button => button.addEventListener("click", () => {
+    const preset = characterPresets.find(p => p.id === button.dataset.rolePreset)!;
+    character = { ...preset.character }; syncSelections(); persist();
+    toast(`Đã chọn mẫu ${preset.label}. Bạn có thể sửa tên và ngoại hình.`);
+  }));
   const resize = () => {
     const r = arena.getBoundingClientRect(),
       dpr = Math.min(devicePixelRatio || 1, 2);
@@ -141,6 +169,10 @@ export function mountStage(
   };
   new ResizeObserver(resize).observe(arena);
   const syncSelections = () => {
+    root.querySelectorAll<HTMLElement>("[data-role-preset]").forEach(button => {
+      const preset = characterPresets.find(p => p.id === button.dataset.rolePreset)!;
+      button.setAttribute("aria-pressed", String((["kind", "outfit", "hat", "glasses", "color", "body"] as const).every(key => character[key] === preset.character[key])));
+    });
     root
       .querySelectorAll<HTMLElement>("[data-kind]")
       .forEach((el) =>
@@ -240,7 +272,7 @@ export function mountStage(
       ...character,
       kind: kinds[Math.floor(Math.random() * kinds.length)],
       color: colors[Math.floor(Math.random() * colors.length)],
-      outfit: outfits[Math.floor(Math.random() * outfits.length)],
+      outfit: availableOutfits[Math.floor(Math.random() * availableOutfits.length)],
       hat: hats[Math.floor(Math.random() * hats.length)],
       glasses: glasses[Math.floor(Math.random() * glasses.length)],
       body: ["regular", "round", "tall"][Math.floor(Math.random() * 3)],
@@ -340,6 +372,8 @@ export function mountStage(
     const discovery = companion.recordHit(selected, { previousTool, kind: character.kind, scene });
     ranking.recordHit();
     draw();
+    const hitDirection = clientX === undefined ? (session.hits % 2 ? 1 : -1) : clientX < fr.left + fr.width / 2 ? 1 : -1;
+    sculpted?.hit(discovery?.motion || selected, hitDirection);
     clearTimeout(recovery);
     $("#instruction").classList.add("hidden");
     $("#speech").textContent = discovery?.line || [
@@ -363,11 +397,11 @@ export function mountStage(
       const direction = clientX === undefined ? (session.hits % 2 ? 1 : -1) : clientX < fr.left + fr.width / 2 ? 1 : -1;
       const motion = impactMotion(reactionTool, scene === "space", direction);
       if (carriedFigure) motion.figure[0] = { ...motion.figure[0], transform: carriedFigure };
-      figure.animate(motion.figure, {
+      if (!sculpted) figure.animate(motion.figure, {
         duration: motion.duration,
         easing: "cubic-bezier(.2,.7,.25,1)",
       });
-      puppetAnimations = animatePuppet(figure, reactionTool, direction, motion.duration, carried);
+      puppetAnimations = sculpted ? [] : animatePuppet(figure, reactionTool, direction, motion.duration, carried);
       const ball = scene === "football" && selected === "boot" ? root.querySelector(".pitch-ball") : null;
       if (ball) puppetAnimations.push(ball.animate([
         {transform:"none"},
@@ -390,7 +424,7 @@ export function mountStage(
       ], {duration:motion.duration,easing:"ease-out"}));
       const weapon = $("#impact-tool");
       weapon.getAnimations().forEach((a) => a.cancel());
-      weapon.innerHTML = toolArt(selected);
+      weapon.innerHTML = sculpted ? "" : toolArt(selected);
       weapon.style.left = `${x}px`;
       weapon.style.top = `${y}px`;
       weapon.animate(impactMotion(selected, scene === "space", direction).weapon, { duration: 380, easing: "ease-out" });
@@ -436,10 +470,12 @@ export function mountStage(
     const y = Math.max(-1, Math.min(1, (event.clientY - rect.top) / rect.height * 2 - 1));
     figure.style.setProperty("--look-x", `${x * 3}px`);
     figure.style.setProperty("--look-y", `${y * 2}px`);
+    sculpted?.look(x, -y);
   });
   figure.addEventListener("pointerleave", () => {
     figure.style.setProperty("--look-x", "0px");
     figure.style.setProperty("--look-y", "0px");
+    sculpted?.look(0, 0);
   });
   reduceMotion.addEventListener("change", () => {
     if (reduceMotion.matches) { cancelMotion(); particles.clear(); }
@@ -486,7 +522,8 @@ export function mountStage(
       cancelMotion();
       particles.clear();
       audio.mute();
-      saveSnapshot();
+      // Every input saves immediately. Hiding a read-only tab must not write
+      // another cloud revision or turn a clean snapshot into a pending edit.
     } else companion.refresh();
   });
   let companion: ReturnType<typeof mountCompanion>;
@@ -540,15 +577,16 @@ export function mountStage(
       }
     }
   };
-  const saveSnapshot = () => {
-    if (discardingLocal) return;
-    saveGeneration++;
+  const saveSnapshot = (localOnly = false) => {
+    if (discardingLocal || initializing) return;
+    if (!localOnly) saveGeneration++;
     const characterSaved = saveCharacter(character, characterKey),
       sessionSaved = saveSession(session, sessionKey);
     savePreferences(preferences, preferencesKey);
     if (!characterSaved || !sessionSaved)
       $("#saved-note").textContent =
         "Trình duyệt chưa cho lưu. Bạn vẫn chơi được.";
+    if (localOnly) return;
     if (account.cloud && account.userId) {
       savePending(
         account.userId,
@@ -564,9 +602,11 @@ export function mountStage(
   };
   companion = mountCompanion(root, {
     getCharacter: () => character,
+    getPortrait: value => sculpted?.portrait(value, 640),
     getScene: () => scene,
     onPreset: (value, newScene) => {
-      character = { ...value, name: character.name };
+      character = accessibleCharacter({ ...value, name: character.name }, owned);
+      if (character.outfit !== value.outfit) toast("Bạn mới đã vào sân. Bộ trang phục này có thể xem thử trong tủ đồ.");
       syncSelections();
       persist();
       root
@@ -586,6 +626,7 @@ export function mountStage(
       syncSelections();
       persist();
     },
+    { getOwned: () => owned, openShop: () => shop.open(), portrait: value => sculpted?.portrait(value) },
   );
   let signingIn = false;
   const signIn = async () => {
@@ -609,8 +650,30 @@ export function mountStage(
     account.cloud || account.publicCloud,
     toast,
     account.userId,
-    { connectCloud: account.connectCloud, onSignIn: account.connectCloud ? () => void signIn() : undefined },
+    { connectCloud: account.connectCloud, onSignIn: account.connectCloud ? () => void signIn() : undefined, portrait: value => sculpted?.portrait(value) },
   );
+  const shop = mountShop(root, account, {
+    portrait: value => sculpted?.portrait(value),
+    getCharacter: () => character,
+    getOwned: () => owned,
+    onSignIn: () => void signIn(),
+    onRestore: items => {
+      owned.clear();
+      items.forEach(item => owned.add(item));
+      availableOutfits = wearableOutfits(owned);
+      $("#outfit").innerHTML = availableOutfits.map(outfit => `<option value="${outfit}">${outfitLabels[outfit]}</option>`).join("");
+      const before = character.outfit;
+      character = accessibleCharacter(character, owned);
+      syncSelections();
+      if (before !== character.outfit) persist();
+    },
+    onWear: outfit => {
+      character = accessibleCharacter({ ...character, outfit }, owned);
+      syncSelections();
+      persist();
+    },
+    toast,
+  });
   $("#account-open").addEventListener("click", () =>
     $<HTMLDialogElement>("#account-dialog").showModal(),
   );
@@ -650,10 +713,43 @@ export function mountStage(
   root
     .querySelector<HTMLButtonElement>(`button[data-scene="${scene}"]`)!
     .click();
+  initializing = false;
+  saveSnapshot(!account.needsInitialSave);
   if (account.conflicted) $<HTMLDialogElement>("#sync-conflict").showModal();
   if (session.hits) {
     $("#speech").textContent = "Mình vẫn nhớ phiên chơi của bạn.";
     $("#instruction").classList.add("hidden");
     $("#milestone").textContent = "Phiên trước vẫn còn đây. Cứ chơi tiếp nhé.";
   }
+  let loading3d = false;
+  const fallBack = () => {
+    sculpted?.dispose(); sculpted = undefined; previousAppearance = "";
+    arena.querySelector(".stage-render-3d")?.remove(); delete arena.dataset.renderer;
+    renderControl.disabled = false; renderControl.textContent = "Bật tạo hình 3D";
+  };
+  const load3d = async () => {
+    if (loading3d || sculpted) return;
+    loading3d = true; renderControl.disabled = true;
+    const host = document.createElement("div"); host.className = "stage-render-3d"; host.setAttribute("aria-hidden", "true"); arena.append(host);
+    try {
+      const { createToyStage } = await import("../character/renderer3d");
+      sculpted = createToyStage(host, () => {
+        arena.dataset.renderer = "3d"; renderControl.disabled = false; renderControl.textContent = "Dùng bản nhẹ 2D";
+      }, { game: true });
+      sculpted.character(character); sculpted.session(mood, session.marks); previousAppearance = JSON.stringify(character);
+      host.addEventListener("toy-context-lost", fallBack, { once: true });
+      for (const preset of characterPresets) {
+        const image = sculpted.portrait(preset.character);
+        if (image) presets.querySelector(`[data-role-preset="${preset.id}"] .role-portrait`)!.innerHTML = `<img src="${image}" alt=""/>`;
+      }
+      root.querySelectorAll<HTMLElement>("[data-kind]").forEach(button => {
+        const image = sculpted?.portrait({ ...character, kind: button.dataset.kind as Character["kind"] });
+        if (image) button.querySelector("span")!.innerHTML = `<img src="${image}" alt=""/>`;
+      });
+    } catch { fallBack(); }
+    finally { loading3d = false; }
+  };
+  renderControl.addEventListener("click", () => { if (sculpted) fallBack(); else void load3d(); });
+  window.addEventListener("pagehide", event => { if (!event.persisted) sculpted?.dispose(); });
+  void load3d();
 }

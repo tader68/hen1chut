@@ -1,12 +1,12 @@
 import type { Cloud, LeaderboardEntry, RankedRound } from "../platform/cloud";
-import { escapeHtml } from "../character/model";
+import { escapeHtml, type Character } from "../character/model";
 import { renderFigure } from "../character/figure";
 export function mountRanking(
   root: HTMLElement,
   cloud: Cloud | undefined,
   toast: (message: string) => void,
   userId?: string,
-  options: { connectCloud?: () => Promise<Cloud>; onSignIn?: () => void } = {},
+  options: { connectCloud?: () => Promise<Cloud>; onSignIn?: () => void; portrait?: (character: Character) => string | undefined } = {},
 ) {
   const dialog = document.createElement("dialog");
   dialog.className = "ranking-dialog";
@@ -58,7 +58,7 @@ export function mountRanking(
       return;
     }
     $("#ranking-content").innerHTML =
-      `<ol class="ranking-list">${entries.map((e) => `<li class="${e.is_me ? "is-me" : ""}"><span class="rank-number">${e.rank}</span><span class="ranking-avatar">${renderFigure(e.avatar, "normal", `rank-${e.rank}`)}</span><span class="rank-nickname">${escapeHtml(e.nickname)}${e.is_me ? "<small>Bạn</small>" : ""}</span><strong>${e.score}<small>lượt</small></strong></li>`).join("")}</ol>`;
+      `<ol class="ranking-list">${entries.map((e) => { const image = options.portrait?.(e.avatar); return `<li class="${e.is_me ? "is-me" : ""}"><span class="rank-number">${e.rank}</span><span class="ranking-avatar">${image ? `<img src="${image}" alt=""/>` : renderFigure(e.avatar, "normal", `rank-${e.rank}`)}</span><span class="rank-nickname">${escapeHtml(e.nickname)}${e.is_me ? "<small>Bạn</small>" : ""}</span><strong>${e.score}<small>lượt</small></strong></li>`; }).join("")}</ol>`;
   };
   const load = async () => {
     const current = ++request;

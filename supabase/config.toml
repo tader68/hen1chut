@@ -1,0 +1,8 @@
+project_id = "hen1chut"
+
+[functions.checkout]
+verify_jwt = true
+
+# SePay sends HMAC headers, not a Supabase JWT. The handler verifies raw bytes.
+[functions.sepay-webhook]
+verify_jwt = false

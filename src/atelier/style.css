@@ -1,0 +1,75 @@
+.atelier { --atelier-ink:#382c47; --atelier-muted:#70637a; max-width:1440px; margin:auto; padding:0 4.5%; color:var(--atelier-ink); }
+.atelier-header { min-height:88px; display:flex; align-items:center; gap:24px; border-bottom:1px solid #e2dce9; }
+.atelier-brand { font-size:26px; font-weight:800; letter-spacing:-1.2px; }
+.atelier-brand span,.atelier-intro h1 span { color:#9679bd; }
+.atelier-label { font-size:13px; padding-left:24px; border-left:1px solid #d8d0e0; color:var(--atelier-muted); }
+.atelier-back { margin-left:auto; font-size:12px; font-weight:600; }
+.atelier-back span { font-size:19px; margin-left:10px; }
+.atelier-layout { display:grid; grid-template-columns:minmax(0,1fr) 285px; gap:44px; padding:30px 0; align-items:start; }
+.toy-studio { position:relative; min-height:540px; height:calc(100svh - 150px); max-height:870px; background:#ded6ed; border-radius:160px 160px 18px 18px; overflow:hidden; isolation:isolate; }
+.toy-studio-heading { position:absolute; top:40px; left:62px; right:62px; display:flex; align-items:center; justify-content:space-between; z-index:3; pointer-events:none; gap:10px; }
+.atelier-chip { border:1px solid #a898bd; background:#e8e1f0; border-radius:20px; padding:7px 12px; font-size:10px; font-weight:600; }
+.toy-material { font-size:10px; color:#675773; }
+.toy-render { position:absolute; inset:0 0 135px; }
+.toy-render canvas { display:block; width:100%; height:100%; }
+.toy-loading { position:absolute; z-index:5; left:10%; top:45%; width:80%; text-align:center; font-size:13px; line-height:1.9; }
+.toy-loading a,.toy-loading button { text-decoration:underline; background:none; border:0; padding:0; }
+.toy-loading[hidden] { display:none; }
+.toy-touch { position:absolute; inset:90px 0 183px; z-index:2; border:0; background:transparent; touch-action:pan-y; cursor:grab; border-radius:24px; }
+.toy-touch:active { transform:none; cursor:grabbing; }
+.toy-touch:disabled { cursor:wait; }
+.toy-speech { position:absolute; bottom:165px; z-index:3; width:100%; padding:0 20px; text-align:center; font-size:15px; font-weight:600; pointer-events:none; }
+.toy-rotate { position:absolute; z-index:3; left:25px; right:25px; bottom:109px; display:flex; align-items:center; justify-content:center; gap:16px; font-size:10px; color:#675773; }
+.toy-rotate button { width:44px; height:44px; border-radius:50%; border:1px solid #bcb0cd; background:#e9e2f0; font-size:23px; line-height:1; }
+.toy-rotate button:hover { background:white; }
+.atelier-controls { padding:14px 0 0; }
+.atelier-intro { margin-bottom:31px; }
+.atelier-note { color:var(--atelier-muted); font-size:11px; }
+.atelier-intro h1 { font-size:94px; line-height:1.1; letter-spacing:-.04em; font-weight:800; margin:10px 0 13px; }
+.atelier-intro p { font-size:24px; font-weight:500; line-height:1.45; letter-spacing:-.5px; }
+.atelier-options { border:0; padding:0; margin:0 0 24px; min-width:0; }
+.atelier-options legend { font-size:11px; font-weight:600; margin-bottom:10px; padding:0; }
+.toy-costumes { display:flex; flex-direction:column; gap:6px; }
+.toy-costume { display:flex; align-items:center; gap:12px; min-height:48px; border:1px solid transparent; padding:10px 12px; border-radius:12px; background:#eeebf2; text-align:left; width:100%; }
+.toy-costume:hover { background:#e5ddec; }
+.toy-costume[aria-pressed="true"] { border-color:#9b83b8; background:#e8e0f0; }
+.toy-costume strong { display:block; font-size:12px; font-weight:600; }
+.toy-costume small { display:block; margin-top:4px; font-size:10px; color:var(--atelier-muted); }
+.costume-check { margin-left:auto; visibility:hidden; font-size:15px; }
+.toy-costume[aria-pressed="true"] .costume-check { visibility:visible; }
+.costume-sample { display:block; width:33px; height:34px; background:#b69bea; border-radius:40% 43% 37% 37%; box-shadow:inset -4px -4px 0 #9b7dcc,inset 3px 3px 0 #d0b9f3; position:relative; }
+.costume-sample::after { content:""; width:8px; height:8px; background:#ebd6aa; border-radius:2px; position:absolute; left:5px; top:6px; transform:rotate(-20deg); }
+.costume-sample.dragon { background:#8cba9b; box-shadow:inset -4px -4px 0 #60957b,inset 3px 3px 0 #b4dbab; border-radius:50% 50% 35% 35%; }
+.costume-sample.dragon::after { background:#f7d995; top:-4px; left:4px; box-shadow:17px 0 0 #f7d995; width:7px; height:10px; }
+.costume-sample.mecha { background:#b3bed0; box-shadow:inset -4px -4px 0 #8795ad,inset 3px 3px 0 #e2e7ee; border-radius:9px; }
+.costume-sample.mecha::after { background:#91dfbd; left:12px; top:13px; transform:rotate(45deg); }
+.toy-colors { display:flex; align-items:center; gap:7px; }
+.toy-colors button { border:1px solid transparent; padding:9px; background:none; border-radius:50%; width:44px; height:44px; }
+.toy-colors button[aria-pressed="true"] { border-color:#83718f; }
+.toy-colors button span { display:block; width:24px; height:24px; border-radius:50%; background:var(--toy-color); box-shadow:inset -3px -3px 0 #0000000d; }
+.toy-colors>span { font-size:10px; margin-left:6px; color:var(--atelier-muted); }
+.toy-tools { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+.toy-tools button { border:1px solid #e0d8e9; background:transparent; border-radius:13px; padding:12px 3px 10px; display:flex; flex-direction:column; align-items:center; gap:9px; }
+.toy-tools button[aria-pressed="true"] { background:#e8e0f0; border-color:#9b83b8; }
+.toy-tools button:hover { background:#eee7f4; }
+.toy-tools svg { width:34px; height:34px; overflow:visible; }
+.toy-tools span { font-size:10px; }
+.toy-tool-options { position:absolute; bottom:21px; left:26px; right:26px; z-index:3; margin:0; }
+.toy-tool-options legend { text-align:center; margin:0 auto 7px; font-size:10px; color:#675773; }
+.toy-tool-options button { flex-direction:row; justify-content:center; background:#eae3f2; padding:12px 5px; }
+.toy-tool-options button[aria-pressed="true"] { background:#f6f1fa; }
+.toy-tool-options svg { width:28px; height:28px; }
+.toy-pause { border:0; border-bottom:1px solid #b8a9c6; background:none; min-height:44px; padding:0 0 4px; font-size:11px; margin-bottom:17px; }
+.atelier-disclaimer { font-size:10px; line-height:1.8; color:var(--atelier-muted); max-width:31ch; }
+.atelier-footer { display:flex; justify-content:space-between; gap:20px; padding:0 0 23px; font-size:10px; color:var(--atelier-muted); }
+@media(min-width:1100px) { .atelier-layout { gap:64px; grid-template-columns:minmax(0,1fr) 310px; } .atelier-controls { padding-top:35px; } .atelier-intro { margin-bottom:35px; } }
+@media(max-width:700px) {
+  .atelier { padding:0 5%; }.atelier-header { min-height:72px; gap:14px; }.atelier-brand { font-size:23px; }.atelier-label { padding-left:14px; font-size:10px; }.atelier-back { font-size:10px; }.atelier-back span { margin-left:2px; }
+  .atelier-layout { grid-template-columns:1fr; gap:25px; padding:20px 0 28px; }
+  .toy-studio { height:560px; min-height:0; border-radius:110px 110px 16px 16px; }
+  .toy-studio-heading { top:35px; left:36px; right:36px; }.atelier-chip { font-size:9px; padding:6px 9px; }.toy-material { font-size:9px; }
+  .toy-speech { bottom:165px; font-size:13px; }.toy-rotate { bottom:109px; gap:12px; }.toy-rotate span { font-size:10px; }
+  .atelier-controls { display:grid; grid-template-columns:1fr 1fr; gap:20px 16px; padding:0; }.atelier-intro { margin:0; grid-row:span 2; align-self:center; }.atelier-intro h1 { font-size:74px; margin:7px 0; }.atelier-intro p { font-size:20px; }.atelier-options { margin:0; }.toy-costume { padding:7px; gap:7px; }.toy-costume strong { font-size:10px; }.toy-costume small { font-size:8px; }.costume-sample { flex-shrink:0; width:28px; height:29px; }.toy-colors { flex-wrap:wrap; }.toy-colors>span { font-size:9px; }.atelier-options:has(.toy-tools) { grid-column:1/-1; }.toy-tools button { flex-direction:row; justify-content:center; gap:7px; }.toy-tools svg { width:28px; height:28px; }.toy-pause { justify-self:start; align-self:start; margin:0; }.atelier-disclaimer { font-size:9px; }.atelier-footer { line-height:1.8; flex-direction:column; gap:3px; font-size:9px; }
+  .toy-tool-options { left:16px; right:16px; }.toy-tool-options button { gap:4px; }.toy-tool-options span { font-size:9px; }
+}
+@media(prefers-reduced-motion:reduce) { .atelier button { transition:none; } }

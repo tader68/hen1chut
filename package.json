@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Game xả stress hoạt hình tiếng Việt, chạy hoàn toàn trên trình duyệt",
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --maxWorkers=2",
     "dev": "vite",
     "build": "node scripts/validate-env.mjs && tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:edge": "npx --yes deno@2.9.6 check supabase/functions/checkout/index.ts supabase/functions/sepay-webhook/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,11 +16,13 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.10",
     "@types/node": "^24.19.2",
+    "@types/three": "^0.186.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
     "vitest": "^5.0.5"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.118.0"
+    "@supabase/supabase-js": "2.118.0",
+    "three": "0.186.1"
   }
 }

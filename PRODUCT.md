@@ -16,6 +16,8 @@ web
 - Bảng xếp hạng global có dữ liệu server thật. Không seed người chơi/điểm giả trên production.
 - Database phải dùng gói Free, chưa có quyền nâng cấp hoặc bật billing.
 - Animation cần đẹp và có cảm giác tác động rõ, cùng cơ chế khám phá dựa trên nghiên cứu về động lực chơi. Không coi thời gian chơi dài là bằng chứng người dùng thích.
+- Hướng tạo hình mới đã chọn: 3D đồ chơi mềm, biểu cảm lố và chuyển động đàn hồi. Nghiên cứu sức hút của nhân vật để tạo nhận diện/tính cách riêng, không sao chép Minion, Pikachu hoặc IP khác. Chi tiết bằng chứng và giả thuyết ở `docs/suc-hut-nhan-vat.md`.
+- Nâng cấp toàn diện dàn nhân vật trên màn chơi chính, không giới hạn ở Bự hoặc hai bộ premium. Có mẫu sếp, đồng nghiệp nam/nữ, team Biz/Sales để chọn rồi tự chỉnh tên, ngoại hình, trang phục. Mẫu là nhân vật hoạt hình hư cấu, không cần ảnh hoặc danh tính người thật.
 - Phiên chưa kết thúc phải giữ số lượt, biểu cảm, các vết tác động, trang phục và lựa chọn đang dùng qua reload/quay lại.
 - Thêm cả môi trường công sở và sân bóng, có chuyển động riêng, đổi cảnh không reset phiên.
 - Mở rộng đồ chơi, có găng đấm/nắm đấm và nhiều món khác. Có nhiều trang phục, phụ kiện. Cục bực cần nhận diện riêng.
@@ -25,8 +27,8 @@ web
 - Giữ static frontend GitHub Pages đang public. Supabase Free cung cấp Google Auth và PostgreSQL.
 - Nickname, ngoại hình công khai ở leaderboard. Email thuộc Auth, tên nhân vật và phiên thuộc dữ liệu riêng có RLS.
 - Vòng global 30 giây độc lập với bộ đếm tự do. Điểm do RPC nhận lượt với giới hạn 8 lượt/giây server, sequence chống replay, không có API nhận `score` từ client. Cơ chế không chứng minh người thật hoặc ngăn toàn bộ auto-click.
-- Đã chọn VietQR/chuyển khoản cho người chơi Việt Nam. Checkout tạm xếp sau animation/guest entry. Chưa mở tài khoản thanh toán hoặc kết nối ngân hàng.
-- Tất cả đồ hiện có cho thử miễn phí. Đồ trả phí tương lai cần entitlement do webhook thanh toán đã xác minh cấp, không mở khóa bằng flag client.
+- Quyết định mới: bộ Rồng con + Giáp máy giá 10.000đ cho cả hai, mua một lần theo tài khoản Google. VietQR/chuyển khoản, chủ dự án duyệt chuyển khoản thủ công trước. Chưa dùng SePay tự xác nhận, chưa mở tài khoản thanh toán hoặc kết nối ngân hàng.
+- Tất cả đồ hiện có cho thử miễn phí. Đồ trả phí tương lai cần entitlement do server cấp sau khi người có quyền xác nhận chuyển khoản thật, không mở khóa bằng flag client hoặc nút khách báo đã chuyển. Luồng manual đang chuẩn bị, checkout vẫn đóng.
 - Guest chơi ngay cả khi chưa cấu hình backend, có thể đặt tên nhân vật. Không gọi đây là Google login/global ranking đã hoạt động.
 
 ## Ý tưởng đang trao đổi

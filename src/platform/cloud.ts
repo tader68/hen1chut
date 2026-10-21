@@ -6,6 +6,7 @@ import {
 import { normalizeCharacter, type Character } from "../character/model";
 import { normalizePlayerState, type PlayerState } from "./player-state";
 import { rememberPreset } from "../sharing/preset";
+import type { CommerceProduct, CommerceOrder } from "../commerce/catalog";
 export type { PlayerState } from "./player-state";
 export interface Profile {
   user_id: string;
@@ -170,6 +171,33 @@ export class Cloud {
     const { data, error } = await this.client.rpc("finish_ranked_round", {
       p_round_id: id,
     });
+    if (error) throw error;
+    return data;
+  }
+  async ownedItems(): Promise<string[]> {
+    const { data, error } = await this.client.from("entitlements").select("item_key");
+    if (error) throw error;
+    return (data || []).map(item => item.item_key);
+  }
+  async products(): Promise<CommerceProduct[]> {
+    const {data,error} = await this.client.from("commerce_products")
+      .select("sku,name,description,price_vnd,item_keys,active");
+    if (error) throw error;
+    return data || [];
+  }
+  async checkout(action: "create" | "resume", sku: string): Promise<{order:CommerceOrder | null;server_now:string}> {
+    const {data,error} = await this.client.functions.invoke("checkout",{body:{action,sku}});
+    if (error) {
+      let code = "checkout_failed";
+      if ("context" in error && error.context instanceof Response) {
+        try { const body = await error.context.json(); if (typeof body.error === "string") code=body.error; } catch {}
+      }
+      throw new CloudError(code,code);
+    }
+    return data;
+  }
+  async order(id: string): Promise<CommerceOrder | null> {
+    const {data,error} = await this.client.from("commerce_orders").select("*").eq("id",id).maybeSingle();
     if (error) throw error;
     return data;
   }

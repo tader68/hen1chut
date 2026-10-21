@@ -17,6 +17,7 @@ import { toolArt } from "../tools/registry";
 import { discoveries, findDiscovery, type DiscoveryContext } from "../progress/discoveries";
 interface CompanionOptions {
   getCharacter: () => Character;
+  getPortrait?: (character: Character) => string | undefined;
   getScene: () => SceneId;
   onPreset: (character: Character, scene: SceneId) => void;
   onChange: () => void;
@@ -108,6 +109,7 @@ export function mountCompanion(root: HTMLElement, options: CompanionOptions) {
       const generated = await makePostcard(
         options.getCharacter(),
         $<HTMLInputElement>("#postcard-name").checked,
+        options.getPortrait?.(options.getCharacter()),
       );
       if (current !== generation || !dialog.open) return;
       blob = generated;

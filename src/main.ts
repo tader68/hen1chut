@@ -30,7 +30,10 @@ async function start(): Promise<void> {
   mountStage(root, account);
   window.scrollTo(0, 0);
 }
-void start().catch(() => {
+const launch = new URL(location.href).searchParams.has("atelier")
+  ? import("./atelier/main").then(({ mountAtelier }) => mountAtelier(root))
+  : start();
+void launch.catch(() => {
   root.innerHTML =
     '<main class="startup-error"><h1>Chưa mở được góc nhỏ.</h1><p>Thử tải lại nhé. Nhân vật đã lưu trên máy vẫn còn nguyên.</p><button class="primary-button" id="retry-start">Tải lại trang</button><a href="./huong-dan.html">Xem hướng dẫn</a></main>';
   root

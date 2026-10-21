@@ -1,6 +1,6 @@
 import type { Mood } from "./reaction";
 import type { Character } from "./model";
-import { outfitLayer, hatLayer, glassesLayer } from "./wardrobe";
+import { outfitLayer, hatLayer, glassesLayer, costumeHeadLayer } from "./wardrobe";
 import { renderMarks, type Mark } from "./session";
 
 export function renderFigure(
@@ -56,6 +56,7 @@ export function renderFigure(
     <g class="pose-head">
     <g class="pose-tuft">${cat ? `<path d="m83 110-4-65q31 0 47 29m48 0q20-31 45-29l-3 67" fill="${color}"/><path d="m90 62 5 35 19-18m75 0 18-18-3 38" fill="#e9b0bb" stroke="none"/>` : blob ? `<path d="M132 85q-36-25-15-38 12-7 23 6-6-26 13-28 20 1 14 28 17-17 29-1 10 18-20 34" fill="url(#${prefix}-skin)"/><path d="M143 62q-7-16 4-20" stroke="white" stroke-opacity=".3" stroke-width="5" fill="none"/>` : `<path d="M82 152Q55 62 116 55q92-34 107 47l-4 79H80Z" fill="${girl ? "#604652" : "#63505b"}"/>`}
     </g>
+    ${costumeHeadLayer(outfit)}
     <path d="${blob ? "M85 104Q86 76 116 77l68-2q37 0 40 34l5 59q0 36-38 39l-83-2q-38-3-36-35Z" : "M77 134q-3-59 69-64 76-3 80 62 6 69-75 76-80-1-74-74Z"}" fill="url(#${prefix}-skin)"/>
     ${blob ? '<path d="m91 101 12-12 19 8-9 19Z" fill="#eadba5" stroke="none"/><path d="m99 100 8 5" stroke="#b99f7b" stroke-width="2"/><path d="m104 121 22 3m48 0 20-7" stroke="#6b4f7c" stroke-width="5" stroke-linecap="round"/>' : ""}
     <path d="M91 111q12-25 40-27" stroke="white" stroke-opacity=".28" stroke-width="7" fill="none"/>

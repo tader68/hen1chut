@@ -34,3 +34,15 @@
 - Chưa đo Lighthouse/FPS hoặc kiểm tra Safari/iOS/Android thật. Không dùng test unit thay cho các phép đo đó.
 
 Các thay đổi sau commit public nêu trên chỉ được coi đã publish khi workflow của commit mới thành công.
+
+## Bản 3D và mẫu công sở
+
+- Chủ dự án chọn 3D đồ chơi mềm, yêu cầu nâng cả dàn nhân vật và có sếp/Biz/đồng nghiệp, không chỉ hai bộ bán thêm. Code đưa renderer vào màn chơi chính cho cả 4 loại. Sáu mẫu chọn nhanh là tổ hợp từ các loại/đồ miễn phí, không phải sáu model độc lập.
+- Build TypeScript/Vite qua, 74 tests trên 18 files qua, Deno check cả hai Edge Functions qua. Giới hạn Vitest hai workers để tránh tranh CPU khi mở nhiều scene WebGL. Một lần chạy bản tách dùng mặc định nhiều workers đã timeout test config, chạy hai workers hết timeout và được đưa vào script chuẩn.
+- Guest riêng trên `127.0.0.1:4174`: 96 lượt qua UI, tương ứng 4 loại × 12 đồ chơi × 2 cảnh Công sở/Sân bóng. Reload giữ 96, ngoại hình và dấu tác động. Có ảnh xác nhận dấu 3D vẫn nằm trên mặt và mood được khôi phục. Không đưa các lượt này lên bảng điểm production.
+- Thử 48 lựa chọn quần áo (12 đồ miễn phí trên 4 loại), tám lựa chọn đầu, năm lựa chọn kính và ba dáng qua UI. Thay đồ không tăng hoặc reset bộ đếm 96. Chuyển 3D → 2D → 3D cũng giữ 96.
+- Chọn “Chơi tiếp” trong hộp kết thúc giữ 96. Chỉ chọn mở phiên QA mới mới về 0 và xóa dấu, giữ ngoại hình. Các thao tác này là guest QA riêng, không reset phiên Google của chủ dự án.
+- Tủ đồ dùng ảnh render 3D, bưu thiếp xuất được PNG với nhân vật Chị Biz, tên riêng mặc định tắt. File QA ngoài Git: `/Users/dat.ta/Downloads/72eed767-c94e-45c6-a373-e49705fb0ab3.png`. Đã bỏ bóng ellipse cũ khi ảnh đã có bóng 3D để tránh bóng đôi.
+- Fixture browser có hai iframe rộng 375px và 320px, cao 640px. Đo DOM trong fixture cho thấy chiều rộng nội dung/scroll là 360/360 và 305/305 (15px dành cho scrollbar của iframe). Không tràn ngang toàn trang, danh sách vai trò/bối cảnh/đồ chơi vẫn có scroll riêng. Ảnh QA ngoài Git: `/Users/dat.ta/Downloads/app/hen1chut-3d-mobile.png`. Không gọi đây là đo trên điện thoại thật hoặc bằng chứng FPS.
+- Catalog/checkout vẫn đóng. UI có hard gate `SALES_READY=false` cho đến khi luồng duyệt tay được kiểm chứng. Giá đã chốt 10.000đ/cả hai được ghi rõ, chưa nhận chuyển khoản. Không dùng nút xem thử để cấp entitlement.
+- Nghiên cứu sơ cấp, giới hạn và các giả thuyết áp dụng ở `docs/suc-hut-nhan-vat.md`. Chưa có dữ liệu người chơi độc lập về độ thích, mua hàng hay khả năng quay lại.
