@@ -9,12 +9,12 @@ Yêu cầu và tiêu chí bằng chứng hiện hành nằm ở `PRODUCT.md`. Fi
 - Onboarding nickname/tên nhân vật, Google PKCE, private sync và xử lý xung đột thiết bị, nhập phiên guest vào tài khoản mới.
 - Vòng global 30 giây, server kiểm soát thời gian/giới hạn lượt/sequence, bảng thật all-time và 7 ngày.
 - Gợi ý ngày, bài thở, bưu thiếp PNG, link ngoại hình riêng tư, trang hướng dẫn/quyền riêng tư/giới thiệu/404 và metadata.
-- Supabase Free online tại Singapore, RLS trên 6 bảng, 3 migration đã áp dụng. API leaderboard thật trả bảng trống, không seed điểm giả.
+- Supabase Free online tại Singapore, RLS trên 6 bảng, 3 migration đã áp dụng. API leaderboard thật có vòng QA 3 lượt của chủ dự án, không seed điểm giả.
 
 ## Đang hoàn tất
 
-1. Google provider đã bật, Site URL và allowlist đã lưu, Google audience đã chuyển Production. Cần chủ tài khoản hoàn tất consent cá nhân để kiểm chứng vòng đăng nhập thật. Không liên kết billing.
-2. Kiểm chứng login thật, nickname, nhập phiên guest, sync, logout/login, vòng global trên production. Kiểm tra bằng hai tài khoản thật cần chủ tài khoản tham gia khi xác thực.
+1. Google provider đã bật, Site URL và allowlist đã lưu, Google audience đã chuyển Production. Chủ tài khoản đã hoàn tất consent, login thật đã kiểm chứng. Không liên kết billing.
+2. Login, nickname, sync, logout/login và vòng global của chủ dự án đã qua trên production. Còn kiểm tra nhập phiên guest và hai tài khoản/thiết bị thật khi có người tham gia xác thực.
 3. Kiểm tra responsive, reduced motion, contrast và lỗi trình duyệt. Build/tests hiện qua, browser 144 tổ hợp qua. Chưa đo Lighthouse/FPS hoặc kiểm tra điện thoại thật.
 4. Cập nhật GitHub Pages và kiểm tra đúng commit đã publish.
 
