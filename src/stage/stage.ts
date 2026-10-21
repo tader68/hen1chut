@@ -496,7 +496,8 @@ export function mountStage(
     conflictRevision: number | null = account.conflicted
       ? account.cloud!.revision
       : null,
-    saveGeneration = 0;
+    saveGeneration = 0,
+    discardingLocal = false;
   const snapshot = (): PlayerState => ({
     character,
     session,
@@ -504,7 +505,7 @@ export function mountStage(
     preferences,
   });
   const syncCloud = async () => {
-    if (!account.cloud || !navigator.onLine || conflictRevision !== null)
+    if (discardingLocal || !account.cloud || !navigator.onLine || conflictRevision !== null)
       return;
     if (syncing) {
       queued = true;
@@ -540,6 +541,7 @@ export function mountStage(
     }
   };
   const saveSnapshot = () => {
+    if (discardingLocal) return;
     saveGeneration++;
     const characterSaved = saveCharacter(character, characterKey),
       sessionSaved = saveSession(session, sessionKey);
@@ -624,6 +626,10 @@ export function mountStage(
     }
   });
   $("#use-cloud").addEventListener("click", () => {
+    // Reload hides this document. Do not recreate the discarded pending save.
+    discardingLocal = true;
+    clearTimeout(syncTimer);
+    queued = false;
     if (account.userId) clearPending(account.userId);
     location.reload();
   });
